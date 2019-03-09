@@ -1,0 +1,58 @@
+<!doctype html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8\">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>Mosaicbin</title>
+  </head>
+  <body>
+    <h1><a href="/"><img src='/static/icon.gif' width=32 height=32></a>&nbsp;&nbsp;{{ feed_name }}</h1>
+
+    <!-- next and previous buttons -->
+    <p><font face='Arial' size=2>
+      {% if page_no|int > 1 %}
+        <a href='./{{ page_no|int - 1 }}'>Previous Page ({{ page_no|int - 1 }})</a>
+      {% endif %}
+      {% if page_no|int <= page_count %}
+        <a href='./{{ page_no|int + 1 }}'>Next Page ({{ page_no|int + 1 }})</a>
+      {% endif %}
+    </font></p>
+    <hr>
+
+    <form action='/entries/mark_as_read' method='post'>
+      <input type='hidden' name='feed_id' value='{{ feed_id }}'>
+      <input type='hidden' name='current_page' value='{{ page_no }}'>
+      {% for e in entries %}
+          <a name='{{ loop.index0 }}'></a>
+          <h2>{{ e['title'] }}</h2>
+          <!-- <h3>loop index {{ loop.index0 }}</h3> -->
+          <font face='Arial' size=2><a href='#{{ loop.index0-2 }}'><&nbsp;Previous</a>&nbsp;&nbsp;|
+            &nbsp;&nbsp;<a href='#{{ loop.index0+1 }}'>Next&nbsp;></a>&nbsp;&nbsp;|
+            &nbsp;&nbsp;<a href='#top'>Top&nbsp;^</a>&nbsp;&nbsp;|
+            &nbsp;&nbsp;<a href='#bottom'>Bottom&nbsp;-</a></font>
+          <p><font face='Arial'><input type='checkbox' name='entry_id{{ loop.index0 }}' value='{{ e['id'] }}'> Mark as read</font></p>
+          <h4>Published <a href="{{ e['url'] }}">{{ e['published_human_readable'] }}</a></h4>
+          {{ e['content']|safe }}
+          <p><font face="Courier" color="#aaaaaa" size=1>Debug... loop.index0={{ loop.index0 }} entry_id={{ e['id'] }} test={{ e['published_human_readable'] }} per_page={{ per_page }} page_count={{ page_count }}</font></p>
+          <hr>
+      {% endfor %}
+      <a name='bottom'></a>
+      <input type='submit' value='Mark Checked as Read'>
+
+    <!-- next and previous buttons -->
+    <p><font face='Arial' size=2>
+      {% if page_no|int > 1 %}
+        <a href='./{{ page_no|int - 1 }}'>Previous Page ({{ page_no|int - 1 }})</a>
+      {% endif %}
+      {% if page_no|int <= page_count %}
+        <a href='./{{ page_no|int + 1 }}'>Next Page ({{ page_no|int + 1 }})</a>
+      {% endif %}
+    </font></p>
+
+      
+
+
+    </form>
+  </body>
+</html>
