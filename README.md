@@ -1,4 +1,4 @@
-# ![Mosaicbin logo](https://raw.githubusercontent.com/jonpurdy/mosaicbin/master/mosaicbin/static/icon32.gif) Mosaicbin
+#  Mosaicbin ![Mosaicbin logo](https://raw.githubusercontent.com/jonpurdy/mosaicbin/master/mosaicbin/static/icon64.gif)
 
 Mosaicbin is a client and proxy for Feedbin, which is a web-based RSS service. Mosaicbin enables old computers and old browsers to read RSS feeds despite not having any modern SSL or standards support. It does this by proxying feeds and entries from the Feedbin API, formatting them and converting images to be smaller and legacy-compatible, and serving up the result as regular non-SSL HTML 3.2(ish).
 
