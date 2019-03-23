@@ -1,4 +1,5 @@
 from mosaicbin import feedbin
+from mosaicbin import settings
 
 from flask import Flask
 from flask import request
@@ -44,7 +45,7 @@ def show_feed_id(feed_id, page_no):
 
     import math 
 
-    per_page = 3
+    per_page = settings.entries_per_page
 
     # this is just to look up the feed name
     subs_dict = feedbin.get_subs_dict()
