@@ -3,6 +3,13 @@ import datetime
 import os
 from unidecode import unidecode
 import mosaicbin.settings as settings
+from threading import Thread
+from queue import Queue
+
+from skimage.io import imread, imshow
+from skimage.transform import resize
+from skimage.util import img_as_ubyte
+from PIL import Image, ImageFile
 
 endpoint = "https://api.feedbin.com/v2/"
 try:
@@ -11,6 +18,9 @@ except:
     print("Credentials not available. Run:\nexport FEEDBIN_USERNAME='whatever'\nexport FEEDBIN_PASSWORD='whatever'\n")
 #creds = ('username@domain.net', 'password')
 verbose = False
+
+global track_thread_status
+track_thread_status = {}
 
     # now, if a user clicks on the title of a feed, it will redirect them to the
     # unread entries of that feed
@@ -221,17 +231,29 @@ def clean_entries(entries):
         # process the html
         soup = BS(e['content'], features="html.parser")
 
+        #track_thread_status = {} # needed to verify that images are all converted before moving on
         # first, let's convert all images to jpegs and resize them
         for img in soup.find_all('img'):
-
-            #print("----\nbefore: %s" % img)
 
             # now, let's remove the size attribute from images
             del(img['srcset'])
             #print("after srcset removal: %s" % img)
 
-            new_url, width = convert_image_to_jpg_from_url(img['src'])
-            new_tag = soup.new_tag('img', src=new_url, width=width)
+            #new_url, width = convert_image_to_jpg_from_url(img['src'])
+
+
+            track_thread_status[img['src']] = False # sets the image status since it's not done yet
+
+            #### for testing threading and ensuring page doesn't load before all threads are done
+            print("*****track_thread_status:*****" % track_thread_status)
+            for i in track_thread_status:
+                print(track_thread_status[i])
+            print("**********")
+
+            new_url = convert_image_to_jpg_from_url(img['src']) # removed width
+
+            # new_tag = soup.new_tag('img', src=new_url, width=width)
+            new_tag = soup.new_tag('img', src=new_url) # removed width, but put it back if things break
             print("after: %s" % new_url)
 
             # this is confusing to me
@@ -240,6 +262,12 @@ def clean_entries(entries):
             # look into why this is later
             img.replaceWith(new_tag)
             print("final img: %s\n----" % img)
+
+            #### for testing threading and ensuring page doesn't load before all threads are done
+            print("*****track_thread_status:*****" % track_thread_status)
+            for i in track_thread_status:
+                print(track_thread_status[i])
+            print("**********")
 
         if settings.loband == True:
             for link in soup.find_all('a'):
@@ -270,12 +298,6 @@ def clean_entries(entries):
 
 def convert_image_to_jpg_from_url(url):
 
-    from skimage.io import imread, imshow
-    from skimage.transform import resize
-    from skimage.util import img_as_ubyte
-
-    from PIL import Image, ImageFile
-
     # prep path for output
     segments = url.rpartition('/')
     filename = segments[-1].split('?')[0] # removed the stuff after ? with whatever.jpg?w=557
@@ -287,39 +309,50 @@ def convert_image_to_jpg_from_url(url):
         img1 = imread(output_filepath)
         width = img1.shape[1]
         new_url = static_path + filename
+        track_thread_status[url] = True
 
-        return new_url, width
+        return new_url # , width
 
     else:
+        print("File doesn't exist, so let's create it...")
+        track_thread_status[url] = threaded_convert(url, output_filepath)
+        worker = Thread(target=threaded_convert, args=(url, output_filepath,))
+        worker.setDaemon(True)
+        worker.start()
 
-        print("url from convert_image_to_jpg_from_url: %s" % url)
-        #url = "https://prasadpamidi.github.io/images/image2.jpg"
-        img1 = imread(url)
-
-        height = img1.shape[0]
-        width = img1.shape[1]
-        max_output_width = settings.img_width # base setting for how wide these images will be
-        print("height: %s  width: %s" % (height, width))
-
-        if width >= max_output_width:
-            print("width >= %s, resizing..." % settings.img_width)
-            ratio = height/width # for fixed width images
-            output_height = int(max_output_width * ratio) # figure out how wide the output image will be
-            img1 = resize(img1, (output_height, max_output_width))
-            print("ratio: %s output_height: %s  max_output_width: %s" % (ratio, output_height, max_output_width))
-            width = max_output_width # so I can pass the correct width out of this function
-
-        # convert
-        img3 = img_as_ubyte(img1)
-        img4 = Image.fromarray(img3)
-        img5 = img4.convert("RGB") # if the source has alpha, remove it
-
-        # save the file and generate the new url
-        img5.save(output_filepath, "JPEG", quality=80, optimize=True, progressive=True)
         new_url = "%s" % static_path + filename
         print("new url from function: %s" % new_url)
 
-        return new_url, width
+        return new_url# , # width not returning width anymore for parallelization
+
+def threaded_convert(url, output_filepath):
+    
+    print("url from convert_image_to_jpg_from_url: %s" % url)
+    #url = "https://prasadpamidi.github.io/images/image2.jpg"
+    img1 = imread(url)
+
+    height = img1.shape[0]
+    width = img1.shape[1]
+    max_output_width = settings.img_width # base setting for how wide these images will be
+    print("height: %s  width: %s" % (height, width))
+
+    if width >= max_output_width:
+        print("width >= %s, resizing..." % settings.img_width)
+        ratio = height/width # for fixed width images
+        output_height = int(max_output_width * ratio) # figure out how wide the output image will be
+        img1 = resize(img1, (output_height, max_output_width))
+        print("ratio: %s output_height: %s  max_output_width: %s" % (ratio, output_height, max_output_width))
+        width = max_output_width # so I can pass the correct width out of this function
+
+    # convert
+    img3 = img_as_ubyte(img1)
+    img4 = Image.fromarray(img3)
+    img5 = img4.convert("RGB") # if the source has alpha, remove it
+
+    # save the file and generate the new url
+    img5.save(output_filepath, "JPEG", quality=80, optimize=True, progressive=True)
+
+    return True
 
 def mark_entries_as_read(entry_ids):
 
