@@ -298,11 +298,11 @@ def convert_image_to_jpg_from_url(url):
 
         height = img1.shape[0]
         width = img1.shape[1]
-        max_output_width = 640 # base setting for how wide these images will be
+        max_output_width = settings.img_width # base setting for how wide these images will be
         print("height: %s  width: %s" % (height, width))
 
-        if width >= 640:
-            print("width >= 640, resizing...")
+        if width >= max_output_width:
+            print("width >= %s, resizing..." % settings.img_width)
             ratio = height/width # for fixed width images
             output_height = int(max_output_width * ratio) # figure out how wide the output image will be
             img1 = resize(img1, (output_height, max_output_width))
