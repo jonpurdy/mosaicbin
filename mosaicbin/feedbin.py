@@ -294,6 +294,17 @@ def clean_entries(entries):
         e['content'] = unidecode(e['content'])
         e['title'] = unidecode(e['title'])
 
+
+    # Let's make sure all threads are done converting before we return entries
+    all_done = False
+    while all_done == False:
+        for image in track_thread_status:
+            if track_thread_status[image] == False:
+                all_done = False
+            else:
+                all_done = True
+    print("All threads done converting!")
+
     return entries
 
 def convert_image_to_jpg_from_url(url):
