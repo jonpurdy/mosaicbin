@@ -35,6 +35,7 @@
           <h4>Published <a href="{{ e['url'] }}">{{ e['published_human_readable'] }}</a></h4>
           {{ e['content']|safe }}
           <p><font face="Courier" color="#aaaaaa" size=1>Debug... loop.index0={{ loop.index0 }} entry_id={{ e['id'] }} test={{ e['published_human_readable'] }} per_page={{ per_page }} page_count={{ page_count }}</font></p>
+          <p><font face='Arial'><input type='checkbox' name='entry_id{{ loop.index0 }}' value='{{ e['id'] }}'> Mark as read</font></p>
           <hr>
       {% endfor %}
       <a name='bottom'></a>
