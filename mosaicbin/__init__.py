@@ -28,6 +28,14 @@ def root():
             print_string += "<a href='feed/%s/1'>%s</a></br>" % (feed_id, subs_dict[feed_id])
         print_string += "</p>"
 
+    # added to deal with subs that have no tags
+    # credit K Trueno
+    if len(tags) < 1:
+        print_string += "<h1>All Feeds</h1>"
+        print_string += "<p>"
+        for feed in subs_dict:
+            print_string += "<a href='feed/%s/1'>%s</a></br>" % (feed, subs_dict[feed])
+
     return render_template('base.html', print_string=print_string)
 
 

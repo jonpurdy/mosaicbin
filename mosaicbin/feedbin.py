@@ -2,6 +2,7 @@ import requests
 import datetime
 import os
 from unidecode import unidecode
+import mosaicbin.settings as settings
 
 endpoint = "https://api.feedbin.com/v2/"
 try:
@@ -239,6 +240,17 @@ def clean_entries(entries):
             # look into why this is later
             img.replaceWith(new_tag)
             print("final img: %s\n----" % img)
+
+        if settings.loband == True:
+            for link in soup.find_all('a'):
+                print("##%s" % link)
+                loband_url = link['href']
+                loband_url = loband_url.replace("http://", "")
+                loband_url = loband_url.replace("https://", "")
+                loband_url = "http://www.loband.org/loband/filter/" + '/'.join(loband_url.split('/')[0].split('.')[::-1]) + '/%20/' + '/'.join(loband_url.split('/')[1:])
+                print("######%s" % loband_url)
+                link['href'] = loband_url
+                print("###%s" % link)
 
         # delete iframes completely
         for iframe in soup('iframe'):

@@ -43,7 +43,8 @@ This will open up the default Flask webserver on port 5000. You can connect to l
 * put unread counts next to feed titles
 * create vagrantfile
 * ✓ get rights to hamburger logo
-* * create license
+* ✓ create license
+* config/settings file
 
 
 ## Links
