@@ -35,8 +35,8 @@ This will open up the default Flask webserver on port 5000. You can connect to l
 * ✓ pagination on entries
 * ✓ put credentials in env variable
 * image conversion to non-http jpeg
-	*  ✓ intercept post, grab images, process and serve them for low bandwidth
-	* parallelize image conversion
+	* ✓ intercept post, grab images, process and serve them for low bandwidth
+	* ✓ parallelize image conversion
 	* ✓ check if image has already been converted
 	* clean up conversion directory automatically
 	* ✓ easy way to change output size (in menu or config file)
@@ -44,7 +44,7 @@ This will open up the default Flask webserver on port 5000. You can connect to l
 * create vagrantfile
 * ✓ get rights to hamburger logo
 * ✓ create license
-* config/settings file
+* ✓ config/settings file
 
 
 ## Links
