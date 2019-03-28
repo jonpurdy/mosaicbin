@@ -1,4 +1,5 @@
 from mosaicbin import feedbin
+from mosaicbin import settings
 
 from flask import Flask
 from flask import request
@@ -12,7 +13,7 @@ def test():
     name='test'
     return render_template('base.html', name=name)
 
-global subs_dict
+#global subs_dict # delete later, thanks codefactor
 
 @app.route('/')
 def root():
@@ -44,7 +45,7 @@ def show_feed_id(feed_id, page_no):
 
     import math 
 
-    per_page = 3
+    per_page = settings.entries_per_page
 
     # this is just to look up the feed name
     subs_dict = feedbin.get_subs_dict()
@@ -55,7 +56,8 @@ def show_feed_id(feed_id, page_no):
 
     entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
 
-    if len(entries) > 0:
+    # if len(entries) > 0: # delete later, thanks codefactor
+    if entries:
         
         clean_entries = feedbin.clean_entries(entries)
         page_count = math.ceil(total_count / per_page)
@@ -75,7 +77,8 @@ def mark_entries_as_read():
     print_string = "<p>"
     entry_ids = []
 
-    if len(request.form) > 0:
+    # if len(request.form) > 0: # delete later, thanks codefactor
+    if request.form:
 
         # probably just not returning the first id for some reason, perhaps due to the hack
         for v in request.form:

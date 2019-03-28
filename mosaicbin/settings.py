@@ -1,3 +1,3 @@
 loband = True
-img_width = 480
-# entries_per_page = 5
+img_width = 640
+entries_per_page = 5
