@@ -15,7 +15,7 @@ import time
 endpoint = "https://api.feedbin.com/v2/"
 try:
     creds = (str(os.environ['FEEDBIN_USERNAME']), str(os.environ['FEEDBIN_PASSWORD']))
-except:
+except Exception as e:
     print("Credentials not available. Run:\nexport FEEDBIN_USERNAME='whatever'\nexport FEEDBIN_PASSWORD='whatever'\n")
 #creds = ('username@domain.net', 'password')
 verbose = False
@@ -165,7 +165,8 @@ def get_entries(feed_id, unread, per_page, page_no):
 
     # this might need fixing
     print("len(r.json()): %s" % len(r.json()))
-    if len(r.json()) > 0:
+    # if len(r.json()) > 0: # delete this later if no issues
+    if r.json():
         print("let's start the loop: all of feed_id %s's entries len(r.json()) is greater than 0" % feed_id)
         for entry in r.json(): 
             if entry['id'] in unread:
@@ -237,7 +238,7 @@ def clean_entries(entries):
             # if the content is blank but everything else is good
             # A NoneType will mess up later, so let's just make it a string now
             if e['content'] == None:
-                e['content'] = str("Mosaicbin: No content.")
+                e['content'] = str("Mosaicbin: no content.")
 
             else:
                 soup = BS(e['content'], features="html.parser")
@@ -281,7 +282,7 @@ def clean_entries(entries):
                     print("**********")
 
 
-                if settings.loband == True:
+                if settings.loband is True:
                     for link in soup.find_all('a'):
                         print("##%s" % link)
                         loband_url = link['href']
