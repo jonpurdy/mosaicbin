@@ -237,7 +237,7 @@ def clean_entries(entries):
 
             # if the content is blank but everything else is good
             # A NoneType will mess up later, so let's just make it a string now
-            if e['content'] == None:
+            if e['content'] is None:
                 e['content'] = str("Mosaicbin: no content.")
 
             else:
@@ -316,9 +316,11 @@ def clean_entries(entries):
     # this will not update and not work if one thread fails
     timer = 0
     all_done = False
-    while all_done == False:
+    # while all_done is False: # delete later, thanks codefactor
+    while all_done is False:
         for image in track_thread_status:
-            if track_thread_status[image] == False:
+            # if track_thread_status[image] == False: # delete later, thanks codefactor
+            if track_thread_status[image] is False:
                 all_done = False
             else:
                 all_done = True
