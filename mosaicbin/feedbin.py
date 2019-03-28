@@ -20,7 +20,6 @@ except Exception as e:
 #creds = ('username@domain.net', 'password')
 verbose = False
 
-global track_thread_status
 track_thread_status = {}
 
     # now, if a user clicks on the title of a feed, it will redirect them to the
@@ -107,7 +106,6 @@ def get_tagging():
     for i in r.json():
         if verbose:
             print(i)
-        pass
 
     return r.json()
 
