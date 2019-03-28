@@ -10,6 +10,7 @@ from skimage.io import imread, imshow
 from skimage.transform import resize
 from skimage.util import img_as_ubyte
 from PIL import Image, ImageFile
+import time
 
 endpoint = "https://api.feedbin.com/v2/"
 try:
@@ -220,6 +221,7 @@ def clean_entries(entries):
     import dateutil.parser
     from bs4 import BeautifulSoup as BS
 
+    print("len(entries): %s" % len(entries))
     for e in entries:
         for k in e:
             print("key: %s\nvalue: %s" % (k, e[k]))
@@ -228,74 +230,90 @@ def clean_entries(entries):
         x = dateutil.parser.parse(e['published'])
         e['published_human_readable'] = x.strftime("%Y-%m-%d %H:%M:%S UTC")
 
-        # process the html
-        soup = BS(e['content'], features="html.parser")
+        try:
+            # process the html
+            print("e['content']: %s" % e['content'])
 
-        #track_thread_status = {} # needed to verify that images are all converted before moving on
-        # first, let's convert all images to jpegs and resize them
-        for img in soup.find_all('img'):
+            # if the content is blank but everything else is good
+            # A NoneType will mess up later, so let's just make it a string now
+            if e['content'] == None:
+                e['content'] = str("Mosaicbin: No content.")
 
-            # now, let's remove the size attribute from images
-            del(img['srcset'])
-            #print("after srcset removal: %s" % img)
+            else:
+                soup = BS(e['content'], features="html.parser")
 
-            #new_url, width = convert_image_to_jpg_from_url(img['src'])
+                #track_thread_status = {} # needed to verify that images are all converted before moving on
+                # first, let's convert all images to jpegs and resize them
+                for img in soup.find_all('img'):
+
+                    # now, let's remove the size attribute from images
+                    del(img['srcset'])
+                    #print("after srcset removal: %s" % img)
+
+                    #new_url, width = convert_image_to_jpg_from_url(img['src'])
 
 
-            track_thread_status[img['src']] = False # sets the image status since it's not done yet
+                    track_thread_status[img['src']] = False # sets the image status since it's not done yet
 
-            #### for testing threading and ensuring page doesn't load before all threads are done
-            print("*****track_thread_status:*****" % track_thread_status)
-            for i in track_thread_status:
-                print(track_thread_status[i])
-            print("**********")
+                    #### for testing threading and ensuring page doesn't load before all threads are done
+                    print("*****track_thread_status:*****" % track_thread_status)
+                    for i in track_thread_status:
+                        print(track_thread_status[i])
+                    print("**********")
 
-            new_url = convert_image_to_jpg_from_url(img['src']) # removed width
+                    new_url = convert_image_to_jpg_from_url(img['src']) # removed width
 
-            # new_tag = soup.new_tag('img', src=new_url, width=width)
-            new_tag = soup.new_tag('img', src=new_url) # removed width, but put it back if things break
-            print("after: %s" % new_url)
+                    # new_tag = soup.new_tag('img', src=new_url, width=width)
+                    new_tag = soup.new_tag('img', src=new_url) # removed width, but put it back if things break
+                    print("after: %s" % new_url)
 
-            # this is confusing to me
-            # originally had img = new_tag, which looked like it worked but then didn't
-            # this prints out img incorrectly but works in practice
-            # look into why this is later
-            img.replaceWith(new_tag)
-            print("final img: %s\n----" % img)
+                    # this is confusing to me
+                    # originally had img = new_tag, which looked like it worked but then didn't
+                    # this prints out img incorrectly but works in practice
+                    # look into why this is later
+                    img.replaceWith(new_tag)
+                    print("final img: %s\n----" % img)
 
-            #### for testing threading and ensuring page doesn't load before all threads are done
-            print("*****track_thread_status:*****" % track_thread_status)
-            for i in track_thread_status:
-                print(track_thread_status[i])
-            print("**********")
+                    #### for testing threading and ensuring page doesn't load before all threads are done
+                    print("*****track_thread_status:*****" % track_thread_status)
+                    for i in track_thread_status:
+                        print(track_thread_status[i])
+                    print("**********")
 
-        if settings.loband == True:
-            for link in soup.find_all('a'):
-                print("##%s" % link)
-                loband_url = link['href']
-                loband_url = loband_url.replace("http://", "")
-                loband_url = loband_url.replace("https://", "")
-                loband_url = "http://www.loband.org/loband/filter/" + '/'.join(loband_url.split('/')[0].split('.')[::-1]) + '/%20/' + '/'.join(loband_url.split('/')[1:])
-                print("######%s" % loband_url)
-                link['href'] = loband_url
-                print("###%s" % link)
 
-        # delete iframes completely
-        for iframe in soup('iframe'):
-            iframe.extract()
+                if settings.loband == True:
+                    for link in soup.find_all('a'):
+                        print("##%s" % link)
+                        loband_url = link['href']
+                        loband_url = loband_url.replace("http://", "")
+                        loband_url = loband_url.replace("https://", "")
+                        loband_url = "http://www.loband.org/loband/filter/" + '/'.join(loband_url.split('/')[0].split('.')[::-1]) + '/%20/' + '/'.join(loband_url.split('/')[1:])
+                        print("######%s" % loband_url)
+                        link['href'] = loband_url
+                        print("###%s" % link)
 
-        # delete svg completely
-        for svg in soup('svg'):
-            svg.extract()
+                # delete iframes completely
+                for iframe in soup('iframe'):
+                    iframe.extract()
 
-        e['content'] = str(soup)
+                # delete svg completely
+                for svg in soup('svg'):
+                    svg.extract()
 
-        # lossy conversion to 7-bit ascii (helps with curly quotes, etc)
-        e['content'] = unidecode(e['content'])
-        e['title'] = unidecode(e['title'])
+                e['content'] = str(soup)
+
+                # lossy conversion to 7-bit ascii (helps with curly quotes, etc)
+                e['content'] = unidecode(e['content'])
+                e['title'] = unidecode(e['title'])
+
+        except Exception as e:
+            print(e)
+            e['content'] = "Error parsing or dealing with content in post."
 
 
     # Let's make sure all threads are done converting before we return entries
+    # this will not update and not work if one thread fails
+    timer = 0
     all_done = False
     while all_done == False:
         for image in track_thread_status:
@@ -303,7 +321,13 @@ def clean_entries(entries):
                 all_done = False
             else:
                 all_done = True
-    print("All threads done converting!")
+        if timer >= 5:
+            all_done = True
+            print('Giving up; not waiting for the rest of the threads to finish.')
+        time.sleep(1)
+        timer += 1
+        print("Thread checker sleeping...")
+    print("All threads done converting! (Or we gave up.)")
 
     return entries
 
