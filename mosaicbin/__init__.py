@@ -1,5 +1,6 @@
 from mosaicbin import feedbin
 from mosaicbin import settings
+from mosaicbin import functions
 
 from flask import Flask
 from flask import request
@@ -59,7 +60,7 @@ def show_feed_id(feed_id, page_no):
     # if len(entries) > 0: # delete later, thanks codefactor
     if entries:
         
-        clean_entries = feedbin.clean_entries(entries)
+        clean_entries = functions.clean_entries(entries)
         page_count = math.ceil(total_count / per_page)
 
         return render_template('feed.html', feed_id=feed_id, feed_name=feed_name, entries=clean_entries, per_page=per_page, page_no=page_no, page_count=page_count)
