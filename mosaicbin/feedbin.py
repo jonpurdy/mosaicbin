@@ -9,7 +9,7 @@ try:
 except Exception as e:
     print("Credentials not available. Run:\nexport FEEDBIN_USERNAME='whatever'\nexport FEEDBIN_PASSWORD='whatever'\n")
 #creds = ('username@domain.net', 'password')
-verbose = False
+verbose = True
 
 track_thread_status = {}
 
@@ -75,9 +75,17 @@ def get_subs_and_tags():
     # once we do this, we can print a list of names
     # if the user clicks a name, it links to a page with unread entries for that feed
 
-    subs_dict = get_subs_dict()
-    # for x in subs_dict:
-    #     print("%s %s" % (x, subs_dict[x]))
+
+
+    subs_dict, feeds_dict = get_subs_dict()
+
+    for f in feeds_dict:
+
+        #feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+
+        print(feeds_dict[f].feed_id)
+        print(feeds_dict[f].title)
+        print(feeds_dict[f].unread_count)
 
 
     return subs_dict, tags
@@ -111,13 +119,19 @@ def get_subs_dict():
     r = requests.get(url, auth=creds)
 
     subs_dict = {}
+    feeds_dict = {} # new hotness
 
     for i in r.json():
         if verbose:
             print(i)
         subs_dict[i['feed_id']] = i['title']
+        feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
 
-    return subs_dict
+    # for x in subs_dict:
+    #     print("%s %s" % (x, subs_dict[x]))
+
+
+    return subs_dict, feeds_dict
 
 
 def get_all_unread_entries():
@@ -130,6 +144,34 @@ def get_all_unread_entries():
     r = requests.get(url, auth=creds)
 
     return r.json()
+
+def get_unread_entries_of_feed(feed_id):
+    """ Returns a list of unread entries for a particular feed.
+    """
+
+    unread_entries_all = get_all_unread_entries()
+    unread_entries_feed = []
+
+    one_year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
+    path = "feeds/%s/entries.json" % feed_id # no need for since anymore 
+    url = "%s%s" % (endpoint, path)
+    r = requests.get(url, auth=creds)
+
+    if r.json(): # if there are entries in this feed
+        for entry in r.json(): 
+            if entry['id'] in unread_entries_all:
+                #print("this entry_id %s is unread" % entry['id'])                
+                unread_entries_feed.append(entry)
+
+    return unread_entries_feed
+
+def get_unread_entry_count_of_feed(feed_id):
+    """ Returns an int of the count of unread entries for a particular feed.
+    """ 
+    unread_count = len(get_unread_entries_of_feed(feed_id))
+    #unread_count = 0
+
+    return unread_count
 
 def get_entries(feed_id, unread, per_page, page_no):
 
@@ -235,3 +277,17 @@ def mark_entries_as_read(entry_ids):
 
     
     #return 0
+
+class Feed(object):
+    """ A Feedbin feed
+    """
+    title = ""
+    feed_id = ""
+    unread_count = ""
+
+    def __init__(self, title, feed_id, unread_count):
+        self.title = title
+        self.feed_id = feed_id
+        self.unread_count = unread_count
+
+
