@@ -163,27 +163,32 @@ def threaded_convert(url, output_filepath):
     
     print("url from convert_image_to_jpg_from_url: %s" % url)
     #url = "https://prasadpamidi.github.io/images/image2.jpg"
-    img1 = imread(url)
 
-    height = img1.shape[0]
-    width = img1.shape[1]
-    max_output_width = settings.img_width # base setting for how wide these images will be
-    print("height: %s  width: %s" % (height, width))
+    try:
+        img1 = imread(url)
 
-    if width >= max_output_width:
-        print("width >= %s, resizing..." % settings.img_width)
-        ratio = height/width # for fixed width images
-        output_height = int(max_output_width * ratio) # figure out how wide the output image will be
-        img1 = resize(img1, (output_height, max_output_width))
-        print("ratio: %s output_height: %s  max_output_width: %s" % (ratio, output_height, max_output_width))
-        width = max_output_width # so I can pass the correct width out of this function
+        height = img1.shape[0]
+        width = img1.shape[1]
+        max_output_width = settings.img_width # base setting for how wide these images will be
+        print("height: %s  width: %s" % (height, width))
 
-    # convert
-    img3 = img_as_ubyte(img1)
-    img4 = Image.fromarray(img3)
-    img5 = img4.convert("RGB") # if the source has alpha, remove it
+        if width >= max_output_width:
+            print("width >= %s, resizing..." % settings.img_width)
+            ratio = height/width # for fixed width images
+            output_height = int(max_output_width * ratio) # figure out how wide the output image will be
+            img1 = resize(img1, (output_height, max_output_width))
+            print("ratio: %s output_height: %s  max_output_width: %s" % (ratio, output_height, max_output_width))
+            width = max_output_width # so I can pass the correct width out of this function
 
-    # save the file and generate the new url
-    img5.save(output_filepath, "JPEG", quality=80, optimize=True, progressive=True)
+        # convert
+        img3 = img_as_ubyte(img1)
+        img4 = Image.fromarray(img3)
+        img5 = img4.convert("RGB") # if the source has alpha, remove it
+
+        # save the file and generate the new url
+        img5.save(output_filepath, "JPEG", quality=80, optimize=True, progressive=True)
+
+    except Exception as e:
+        print(e)
 
     return True
