@@ -81,7 +81,7 @@ def get_subs_and_tags():
 
     for f in feeds_dict:
 
-        #feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+        feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
 
         print(feeds_dict[f].feed_id)
         print(feeds_dict[f].title)

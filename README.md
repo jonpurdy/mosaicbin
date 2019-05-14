@@ -41,6 +41,9 @@ This will open up the default Flask webserver on port 5000. You can connect to l
 	* ✕ clean up conversion directory automatically (will worry about this later)
 	* ✓ easy way to change output size (in menu or config file)
 * put unread counts next to feed titles
+	* there's no easy way to do this since unread counts aren't available via API
+	* will do it by updating the unread counts every x minutes and store it in memory
+	* if mosaicbin restarts will just get them all again
 * create vagrantfile
 * ✓ get rights to hamburger logo
 * ✓ create license
