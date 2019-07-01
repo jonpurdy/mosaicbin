@@ -88,7 +88,7 @@ def get_subs_and_tags():
         print(feeds_dict[f].unread_count)
 
 
-    return subs_dict, tags
+    return subs_dict, feeds_dict, tags
 
 
 def get_tagging():
