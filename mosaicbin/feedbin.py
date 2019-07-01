@@ -168,8 +168,10 @@ def get_unread_entries_of_feed(feed_id):
 def get_unread_entry_count_of_feed(feed_id):
     """ Returns an int of the count of unread entries for a particular feed.
     """ 
-    unread_count = len(get_unread_entries_of_feed(feed_id))
-    #unread_count = 0
+
+    # override the function that gets unread entries for now
+    #unread_count = len(get_unread_entries_of_feed(feed_id))
+    unread_count = 0
 
     return unread_count
 
