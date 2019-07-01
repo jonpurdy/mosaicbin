@@ -16,6 +16,8 @@ UNREAD_ENTRIES_RETRIEVED = False # if True, don't go to the API
 
 track_thread_status = {}
 
+global feeds_dict
+
     # now, if a user clicks on the title of a feed, it will redirect them to the
     # unread entries of that feed
 
@@ -84,22 +86,39 @@ def get_subs_and_tags():
 
     subs_dict, feeds_dict = get_subs_dict()
 
+
+    import time
+    from threading import Thread
+
+
     # adding unread counts
     for f in feeds_dict:
     # for each feed, update the unread count
 
-        # here
+        ### multithreaded
+        t = Thread(target=update_unread_entry_count, args=(feeds_dict, feeds_dict[f].feed_id,))
+        t.start()
+        time.sleep(0.1)
+        ###
 
-        feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+        ### single thread
+        #feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
         #feeds_dict[f].unread_count = 0
 
-        print(feeds_dict[f].feed_id)
-        print(feeds_dict[f].title)
-        print(feeds_dict[f].unread_count)
-
+        # print(feeds_dict[f].feed_id)
+        # print(feeds_dict[f].title)
+        # print(feeds_dict[f].unread_count)
+        ### single thread
 
     return subs_dict, feeds_dict, tags
 
+### remove this to make single threaded
+def update_unread_entry_count(feeds_dict, f):
+    feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+    print(feeds_dict[f].feed_id)
+    print(feeds_dict[f].title)
+    print(feeds_dict[f].unread_count)
+### remove this to make single threaded
 
 def get_tagging():
 
@@ -167,7 +186,7 @@ def get_unread_entries_of_feed(feed_id):
     unread_entries_feed = []
 
     path = "feeds/%s/entries.json" % feed_id 
-    url = "%s%s" % (endpoint, path)
+    url = "%s%s" % (endpoint, path) # this needs error checking
     r = requests.get(url, auth=creds)
 
     if r.json(): # if there are entries in this feed
