@@ -19,15 +19,15 @@ def test():
 @app.route('/')
 def root():
 
-    subs_dict, tags = feedbin.get_subs_and_tags()
+    subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
 
     print_string = ""
     for tag in tags:
         print_string += "<h1>%s</h1>" % tag
         print_string += "<p>"
         for feed_id in tags[tag]:
-            # need to look up the feed name using subs_dict
-            print_string += "<a href='feed/%s/1'>%s</a></br>" % (feed_id, subs_dict[feed_id])
+            # need to look up the feed name using subs_dict, now feeds_dict
+            print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
         print_string += "</p>"
 
     # added to deal with subs that have no tags
@@ -35,8 +35,8 @@ def root():
     if len(tags) < 1:
         print_string += "<h1>All Feeds</h1>"
         print_string += "<p>"
-        for feed in subs_dict:
-            print_string += "<a href='feed/%s/1'>%s</a></br>" % (feed, subs_dict[feed])
+        for feed in feeds_dict:
+            print_string += "<a href='feed/%s/1'>%s</a></br>" % (feed, feeds_dict[feed_id].title)
 
     return render_template('base.html', print_string=print_string)
 
@@ -49,8 +49,14 @@ def show_feed_id(feed_id, page_no):
     per_page = settings.entries_per_page
 
     # this is just to look up the feed name
-    subs_dict = feedbin.get_subs_dict()
-    feed_name = subs_dict[int(feed_id)]
+    subs_dict, feeds_dict = feedbin.get_subs_dict()
+
+    try:
+        #feed_name = subs_dict[int(feed_id)]        # old
+        feed_name = feeds_dict[int(feed_id)].title  # new
+    except Exception as e:
+        print(e)
+        feed_name = "unknown, see show_feed_id"
 
     # now we start the real work
     unread = feedbin.get_all_unread_entries()
