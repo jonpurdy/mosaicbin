@@ -11,7 +11,12 @@ except Exception as e:
 #creds = ('username@domain.net', 'password')
 verbose = True
 
+    
+UNREAD_ENTRIES_RETRIEVED = False # if True, don't go to the API
+
 track_thread_status = {}
+
+global feeds_dict
 
     # now, if a user clicks on the title of a feed, it will redirect them to the
     # unread entries of that feed
@@ -27,7 +32,9 @@ track_thread_status = {}
 
 
 def get_subs_and_tags():
-
+    """ Returns subscriptions with tags as a dictionary
+        Main object used by the index page
+    """
     tagging_response = get_tagging()
     if verbose:
         print(len(tagging_response))
@@ -79,17 +86,39 @@ def get_subs_and_tags():
 
     subs_dict, feeds_dict = get_subs_dict()
 
+
+    import time
+    from threading import Thread
+
+
+    # adding unread counts
     for f in feeds_dict:
+    # for each feed, update the unread count
 
-        feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+        ### multithreaded
+        t = Thread(target=update_unread_entry_count, args=(feeds_dict, feeds_dict[f].feed_id,))
+        t.start()
+        time.sleep(0.1)
+        ###
 
-        print(feeds_dict[f].feed_id)
-        print(feeds_dict[f].title)
-        print(feeds_dict[f].unread_count)
+        ### single thread
+        #feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+        #feeds_dict[f].unread_count = 0
 
+        # print(feeds_dict[f].feed_id)
+        # print(feeds_dict[f].title)
+        # print(feeds_dict[f].unread_count)
+        ### single thread
 
     return subs_dict, feeds_dict, tags
 
+### remove this to make single threaded
+def update_unread_entry_count(feeds_dict, f):
+    feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
+    print(feeds_dict[f].feed_id)
+    print(feeds_dict[f].title)
+    print(feeds_dict[f].unread_count)
+### remove this to make single threaded
 
 def get_tagging():
 
@@ -127,6 +156,7 @@ def get_subs_dict():
         subs_dict[i['feed_id']] = i['title']
         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
 
+
     # for x in subs_dict:
     #     print("%s %s" % (x, subs_dict[x]))
 
@@ -134,7 +164,9 @@ def get_subs_dict():
     return subs_dict, feeds_dict
 
 
-def get_all_unread_entries():
+def get_all_unread_entries_list():
+    """ Returns a list of entry IDs that are unread
+    """
 
     path = "unread_entries.json"
     url = "%s%s" % (endpoint, path)
@@ -146,15 +178,15 @@ def get_all_unread_entries():
     return r.json()
 
 def get_unread_entries_of_feed(feed_id):
-    """ Returns a list of unread entries for a particular feed.
+    """ Returns a list of unread entries with full text for a particular feed.
     """
 
-    unread_entries_all = get_all_unread_entries()
+    unread_entries_all = get_all_unread_entries_list()
+
     unread_entries_feed = []
 
-    one_year_ago = datetime.datetime.now() - datetime.timedelta(days=365)
-    path = "feeds/%s/entries.json" % feed_id # no need for since anymore 
-    url = "%s%s" % (endpoint, path)
+    path = "feeds/%s/entries.json" % feed_id 
+    url = "%s%s" % (endpoint, path) # this needs error checking
     r = requests.get(url, auth=creds)
 
     if r.json(): # if there are entries in this feed
@@ -170,8 +202,7 @@ def get_unread_entry_count_of_feed(feed_id):
     """ 
 
     # override the function that gets unread entries for now
-    #unread_count = len(get_unread_entries_of_feed(feed_id))
-    unread_count = 0
+    unread_count = len(get_unread_entries_of_feed(feed_id))
 
     return unread_count
 

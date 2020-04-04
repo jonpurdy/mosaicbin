@@ -27,7 +27,11 @@ def root():
         print_string += "<p>"
         for feed_id in tags[tag]:
             # need to look up the feed name using subs_dict, now feeds_dict
-            print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+
+            # only print the feed name if there are unread entries
+            if feeds_dict[feed_id].unread_count > 0:
+                print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+
         print_string += "</p>"
 
     # added to deal with subs that have no tags
@@ -59,7 +63,7 @@ def show_feed_id(feed_id, page_no):
         feed_name = "unknown, see show_feed_id"
 
     # now we start the real work
-    unread = feedbin.get_all_unread_entries()
+    unread = feedbin.get_all_unread_entries_list()
 
     entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
 
