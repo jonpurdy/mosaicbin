@@ -38,6 +38,7 @@ def get_subs_and_tags():
     tagging_response = get_tagging()
     if verbose:
         print(len(tagging_response))
+        print(tagging_response)
 
     # first, build list of tags
     tag_name_list = []
@@ -157,8 +158,8 @@ def get_subs_dict():
         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
 
 
-    # for x in subs_dict:
-    #     print("%s %s" % (x, subs_dict[x]))
+    for x in subs_dict:
+        print("%s %s" % (x, subs_dict[x]))
 
 
     return subs_dict, feeds_dict

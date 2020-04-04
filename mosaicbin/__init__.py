@@ -21,7 +21,17 @@ def root():
 
     subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
 
+    # We need this to initialize the print_string properly
     print_string = ""
+
+    # Let's get Pages out of the way first
+    print_string += "<h1>Pages</h1>"
+    print_string += "<p>"
+    for feed_id in feeds_dict:
+        if feeds_dict[feed_id].title == "Pages":
+            print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+    print_string += "</p>"
+
     for tag in tags:
         print_string += "<h1>%s</h1>" % tag
         print_string += "<p>"
@@ -31,6 +41,9 @@ def root():
             # only print the feed name if there are unread entries
             if feeds_dict[feed_id].unread_count > 0:
                 print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+            else:
+                if settings.display_unread_entries:
+                    print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
 
         print_string += "</p>"
 
@@ -40,7 +53,7 @@ def root():
         print_string += "<h1>All Feeds</h1>"
         print_string += "<p>"
         for feed in feeds_dict:
-            print_string += "<a href='feed/%s/1'>%s</a></br>" % (feed, feeds_dict[feed_id].title)
+            print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
 
     return render_template('base.html', print_string=print_string)
 

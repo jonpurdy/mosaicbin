@@ -132,32 +132,37 @@ def clean_entries(entries):
 
 def convert_image_to_jpg_from_url(url):
 
-    # prep path for output
-    segments = url.rpartition('/')
-    filename = segments[-1].split('?')[0] # removed the stuff after ? with whatever.jpg?w=557
-    output_filepath = "mosaicbin/static/generated/%s" % filename
-    static_path = "/static/generated/"
+    try:
+        # prep path for output
+        segments = url.rpartition('/')
+        filename = segments[-1].split('?')[0] # removed the stuff after ? with whatever.jpg?w=557
+        output_filepath = "mosaicbin/static/generated/%s" % filename
+        static_path = "/static/generated/"
 
-    if os.path.exists(output_filepath):
-        print("File exists, so just getting it's width and returning the path and width.")
-        img1 = imread(output_filepath)
-        width = img1.shape[1]
-        new_url = static_path + filename
-        track_thread_status[url] = True
+        if os.path.exists(output_filepath):
+            print("File exists, so just getting it's width and returning the path and width.")
+            img1 = imread(output_filepath)
+            width = img1.shape[1]
+            new_url = static_path + filename
+            track_thread_status[url] = True
 
-        return new_url # , width
+            return new_url # , width
 
-    else:
-        print("File doesn't exist, so let's create it...")
-        track_thread_status[url] = threaded_convert(url, output_filepath)
-        worker = Thread(target=threaded_convert, args=(url, output_filepath,))
-        worker.setDaemon(True)
-        worker.start()
+        else:
+            print("File doesn't exist, so let's create it...")
+            track_thread_status[url] = threaded_convert(url, output_filepath)
+            worker = Thread(target=threaded_convert, args=(url, output_filepath,))
+            worker.setDaemon(True)
+            worker.start()
 
-        new_url = "%s" % static_path + filename
-        print("new url from function: %s" % new_url)
+            new_url = "%s" % static_path + filename
+            print("new url from function: %s" % new_url)
 
-        return new_url# , # width not returning width anymore for parallelization
+            return new_url# , # width not returning width anymore for parallelization
+
+    except Exception as e:
+        print(e)
+        return "mosaicbin/static/placeholder.gif"
 
 def threaded_convert(url, output_filepath):
     
