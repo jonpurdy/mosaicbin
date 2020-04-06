@@ -29,7 +29,7 @@ def root():
     print_string += "<p>"
     for feed_id in feeds_dict:
         if feeds_dict[feed_id].title == "Pages":
-            print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+            print_string += "<a href='feed/%s/titles'>View list of articles saved to Feedbin Pages</a> %s </br>" % (feed_id, feeds_dict[feed_id].unread_count)
     print_string += "</p>"
 
     for tag in tags:
@@ -93,6 +93,64 @@ def show_feed_id(feed_id, page_no):
         return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
 
 
+
+@app.route('/feed/<feed_id>/titles')
+def show_feed_titles(feed_id):
+
+    # this is just to look up the feed name
+    subs_dict, feeds_dict = feedbin.get_subs_dict()
+
+    feed_obj = feeds_dict[int(feed_id)]
+
+    try:
+        #feed_name = subs_dict[int(feed_id)]        # old
+        feed_name = feed_obj.title  # new
+    except Exception as e:
+        print(e)
+        feed_name = "unknown, see show_feed_id"
+
+    # now we start the real work
+    unread = feedbin.get_all_unread_entries_list()
+
+    per_page = 10000
+    page_no = 1
+    entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
+
+    if entries:
+
+        return render_template('feed_entry_titles.html', feed_id=feed_id, feed_name=feed_name, entries=entries)
+    
+    else:
+
+        return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
+
+
+@app.route('/feed/<feed_id>/entries/<entry_id>')
+def show_entry(feed_id, entry_id):
+
+    # this is just to look up the feed name
+    subs_dict, feeds_dict = feedbin.get_subs_dict()
+
+    feed_obj = feeds_dict[int(feed_id)]
+
+    try:
+        #feed_name = subs_dict[int(feed_id)]        # old
+        feed_name = feed_obj.title  # new
+    except Exception as e:
+        print(e)
+        feed_name = "unknown, see show_feed_id"
+
+
+    entries = feedbin.get_single_entry(entry_id)
+
+    if entries:
+        clean_entries = functions.clean_entries(entries)
+
+        return render_template('entry.html', feed_id=feed_id, feed_name=feed_name, entries=entries)
+    
+    else:
+
+        return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
 
 
 @app.route('/entries/mark_as_read', methods=['POST'])

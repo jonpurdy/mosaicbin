@@ -283,6 +283,25 @@ def get_entries(feed_id, unread, per_page, page_no):
     else:
         return these_entries, 0
 
+def get_single_entry(entry_id):
+
+    path = "entries/%s.json" % entry_id
+    url = "%s%s" % (endpoint, path)
+    print("URL HERE: %s" % url)
+
+    r = requests.get(url, auth=creds)
+
+    this_entry = [] # for storing 
+
+    # we don't need to traverse through the response
+    # the entire response is the entry
+    if r.json():
+        this_entry.append(r.json())
+            
+        return this_entry
+
+    else:
+        return this_entry
 
 def mark_entries_as_read(entry_ids):
 
@@ -323,5 +342,4 @@ class Feed(object):
         self.title = title
         self.feed_id = feed_id
         self.unread_count = unread_count
-
 
