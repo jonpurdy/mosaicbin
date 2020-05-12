@@ -156,7 +156,7 @@ def show_entry(feed_id, entry_id):
 @app.route('/entries/mark_as_read', methods=['POST'])
 def mark_entries_as_read():
 
-    print_string = "<p>"
+    # print_string = "<p>"
     entry_ids = []
 
     if request.form:
@@ -168,14 +168,19 @@ def mark_entries_as_read():
                 print(v)
                 #print_string += "%s " % request.form[v]
                 entry_ids.append(request.form[v])
-            print("v: %s  PS: %s" % (v, print_string))
+            # print("v: %s  PS: %s" % (v, print_string))
         result = feedbin.mark_entries_as_read(entry_ids)
     else:
-        print_string += "No entry IDs."
+        # print_string += "No entry IDs."
         result = []
 
+    print("REQUESTFORM2: %s" % request.form)
+
+    # commented way back in 2019
     # print_string += "...marked as read.</p><p><a href='/feed/%s/%s'>Go back!</a></p>" % (request.form['feed_id'], request.form['current_page'])
     # print("PS before return: %s" % print_string)
+    
 
-
-    return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'], current_page=request.form['current_page'])
+    # commented 2020-05-12 to remove current_page
+    # return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'], current_page=request.form['current_page'])
+    return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'])
