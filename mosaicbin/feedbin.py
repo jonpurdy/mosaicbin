@@ -38,6 +38,7 @@ def get_subs_and_tags():
     tagging_response = get_tagging()
     if verbose:
         print(len(tagging_response))
+        print(tagging_response)
 
     # first, build list of tags
     tag_name_list = []
@@ -157,8 +158,8 @@ def get_subs_dict():
         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
 
 
-    # for x in subs_dict:
-    #     print("%s %s" % (x, subs_dict[x]))
+    for x in subs_dict:
+        print("%s %s" % (x, subs_dict[x]))
 
 
     return subs_dict, feeds_dict
@@ -282,6 +283,25 @@ def get_entries(feed_id, unread, per_page, page_no):
     else:
         return these_entries, 0
 
+def get_single_entry(entry_id):
+
+    path = "entries/%s.json" % entry_id
+    url = "%s%s" % (endpoint, path)
+    print("URL HERE: %s" % url)
+
+    r = requests.get(url, auth=creds)
+
+    this_entry = [] # for storing 
+
+    # we don't need to traverse through the response
+    # the entire response is the entry
+    if r.json():
+        this_entry.append(r.json())
+            
+        return this_entry
+
+    else:
+        return this_entry
 
 def mark_entries_as_read(entry_ids):
 
@@ -292,7 +312,7 @@ def mark_entries_as_read(entry_ids):
 
     print("received %s" % entry_ids)
 
-    #url = "https://httpbin.org/post" # comment this to actually mark as unread
+    # url = "https://httpbin.org/post" # comment this to actually mark as unread
 
     # hack to get around feedbin api not accepting multiple entry IDs
     # r = requests.post(url, auth=creds, data = {'unread_entries':entry_ids})
@@ -303,12 +323,12 @@ def mark_entries_as_read(entry_ids):
     feedbin_result = []
     for i in entry_ids:
         r = requests.post(url, auth=creds, data = {'unread_entries':i})
-        print("r.text: %s" % r.text)
-        feedbin_result.append(r.text)
+        print("deletion r.text (means there was no problem with the response): %s and status code: %s" % (r.text, r.status_code))
+        feedbin_result.append(r.text.strip("\"")) # the strip is to remove the quotes from the string
 
+    print("feedbin_result: %s" % feedbin_result)
     return feedbin_result
 
-    
     #return 0
 
 class Feed(object):
@@ -322,5 +342,4 @@ class Feed(object):
         self.title = title
         self.feed_id = feed_id
         self.unread_count = unread_count
-
 
