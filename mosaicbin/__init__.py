@@ -2,6 +2,8 @@ from mosaicbin import feedbin
 from mosaicbin import settings
 from mosaicbin import functions
 
+import pickle
+
 from flask import Flask
 from flask import request
 from flask import render_template
@@ -9,17 +11,62 @@ from unidecode import unidecode
 
 app = Flask(__name__)
 
+
+
+use_existing_subs_and_tags = True
+
+# moved up here to make them accessible from any function
+if use_existing_subs_and_tags:
+    try:
+        print("Loading from disk...")
+        fd = open('subs_dict.data', 'rb')
+        subs_dict = pickle.load(fd)
+        fd.close()
+        fd = open('feeds_dict.data', 'rb')
+        feeds_dict = pickle.load(fd)
+        fd.close()
+        fd = open('tags.data', 'rb')
+        tags = pickle.load(fd)
+        fd.close()
+        print("Success!")
+    except Exception as e:
+        print("e")
+        print("Failed to load from disk.")
+
+        exit()
+
+else:
+    subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
+    
+    fw = open('subs_dict.data', 'wb')
+    pickle.dump(subs_dict, fw)
+    fw.close()
+    fw = open('feeds_dict.data', 'wb')
+    pickle.dump(feeds_dict, fw)
+    fw.close()
+    fw = open('tags.data', 'wb')
+    pickle.dump(tags, fw)
+    fw.close()
+    
+
+
 @app.route('/test')
 def test():
     name='test'
     return render_template('base.html', name=name)
 
-#global subs_dict # delete later, thanks codefactor
+@app.route('/debug')
+def debug():
+    name='debug'
+    print_string = ""
+    print_string += feeds_dict
+    return render_template('base.html', name=name, print_string=print_string)
 
 @app.route('/')
 def root():
 
-    subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
+    # moved this up to the top 2020-05-12
+    # subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
 
     # We need this to initialize the print_string properly
     print_string = ""
@@ -58,42 +105,42 @@ def root():
     return render_template('base.html', print_string=print_string)
 
 
-@app.route('/feed/<feed_id>/<page_no>')
-def show_feed_id(feed_id, page_no):
+# @app.route('/feed/<feed_id>/<page_no>')
+# def show_feed_id(feed_id, page_no):
 
-    import math 
+#     import math 
 
-    per_page = settings.entries_per_page
+#     per_page = settings.entries_per_page
 
-    # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+#     # this is just to look up the feed name
+#     subs_dict, feeds_dict = feedbin.get_subs_dict()
 
-    try:
-        #feed_name = subs_dict[int(feed_id)]        # old
-        feed_name = feeds_dict[int(feed_id)].title  # new
-    except Exception as e:
-        print(e)
-        feed_name = "unknown, see show_feed_id"
+#     try:
+#         #feed_name = subs_dict[int(feed_id)]        # old
+#         feed_name = feeds_dict[int(feed_id)].title  # new
+#     except Exception as e:
+#         print(e)
+#         feed_name = "unknown, see show_feed_id"
 
-    # now we start the real work
-    unread = feedbin.get_all_unread_entries_list()
+#     # now we start the real work
+#     unread = feedbin.get_all_unread_entries_list()
 
-    entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
+#     entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
 
-    # if len(entries) > 0: # delete later, thanks codefactor
-    if entries:
+#     # if len(entries) > 0: # delete later, thanks codefactor
+#     if entries:
         
-        clean_entries = functions.clean_entries(entries)
-        page_count = math.ceil(total_count / per_page)
+#         clean_entries = functions.clean_entries(entries)
+#         page_count = math.ceil(total_count / per_page)
 
-        return render_template('feed.html', feed_id=feed_id, feed_name=feed_name, entries=clean_entries, per_page=per_page, page_no=page_no, page_count=page_count)
+#         return render_template('feed.html', feed_id=feed_id, feed_name=feed_name, entries=clean_entries, per_page=per_page, page_no=page_no, page_count=page_count)
     
-    else:
+#     else:
 
-        return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
+#         return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
 
 
-
+@app.route('/feed/<feed_id>')
 @app.route('/feed/<feed_id>/titles')
 def show_feed_titles(feed_id):
 
