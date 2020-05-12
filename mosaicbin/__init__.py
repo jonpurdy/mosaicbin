@@ -40,10 +40,10 @@ def root():
 
             # only print the feed name if there are unread entries
             if feeds_dict[feed_id].unread_count > 0:
-                print_string += "<a href='feed/%s/1'>%s</a> <a href='feed/%s/titles'>(list)</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feed_id, feeds_dict[feed_id].unread_count)
+                print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
             else:
                 if settings.display_unread_entries:
-                    print_string += "<a href='feed/%s/1'>%s</a> <a href='feed/%s/titles'>(list)</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feed_id, feeds_dict[feed_id].unread_count)
+                    print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
 
         print_string += "</p>"
 

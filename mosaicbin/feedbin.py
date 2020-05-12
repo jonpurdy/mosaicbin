@@ -323,7 +323,7 @@ def mark_entries_as_read(entry_ids):
     feedbin_result = []
     for i in entry_ids:
         r = requests.post(url, auth=creds, data = {'unread_entries':i})
-        print("deletion r.text (means there was no problem with the response): %s and status code: %s" % (r.text, r.status_code))
+        print("deletion r.text (means there was NO PROBLEM with the response): %s and status code: %s" % (r.text, r.status_code))
         feedbin_result.append(r.text.strip("\"")) # the strip is to remove the quotes from the string
 
     print("feedbin_result: %s" % feedbin_result)

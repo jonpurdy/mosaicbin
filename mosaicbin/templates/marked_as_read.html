@@ -7,7 +7,8 @@
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
     <meta http-equiv="pragma" content="no-cache" />
 
-    <meta http-equiv="refresh" content="1;url=/feed/{{ feed_id }}/{{ current_page }}" />
+    <!-- <meta http-equiv="refresh" content="1;url=/feed/{{ feed_id }}/{{ current_page }}" /> 2020-05-12 -->
+    <meta http-equiv="refresh" content="1;url=/feed/{{ feed_id }}/titles" />
 
     <title>Mosaicbin</title>
   </head>
@@ -20,7 +21,8 @@
     ...marked as read!</p>
     <p>
       <!-- <a href='/feed/{{ feed_id }}/{{ current_page }}'>Go back!</a> -->
-      <form action="/feed/{{ feed_id }}/{{ current_page }}">
+      <!-- <form action="/feed/{{ feed_id }}/{{ current_page }}"> 2020-05-12-->
+      <form action="/feed/{{ feed_id }}/titles">
         <input type="submit" value="Okay!" />
       </form>
     </p>
