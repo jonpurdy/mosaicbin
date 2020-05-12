@@ -159,7 +159,6 @@ def mark_entries_as_read():
     print_string = "<p>"
     entry_ids = []
 
-    # if len(request.form) > 0: # delete later, thanks codefactor
     if request.form:
 
         # probably just not returning the first id for some reason, perhaps due to the hack

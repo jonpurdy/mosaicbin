@@ -312,7 +312,7 @@ def mark_entries_as_read(entry_ids):
 
     print("received %s" % entry_ids)
 
-    #url = "https://httpbin.org/post" # comment this to actually mark as unread
+    # url = "https://httpbin.org/post" # comment this to actually mark as unread
 
     # hack to get around feedbin api not accepting multiple entry IDs
     # r = requests.post(url, auth=creds, data = {'unread_entries':entry_ids})
@@ -323,12 +323,12 @@ def mark_entries_as_read(entry_ids):
     feedbin_result = []
     for i in entry_ids:
         r = requests.post(url, auth=creds, data = {'unread_entries':i})
-        print("r.text: %s" % r.text)
-        feedbin_result.append(r.text)
+        print("deletion r.text (means there was no problem with the response): %s and status code: %s" % (r.text, r.status_code))
+        feedbin_result.append(r.text.strip("\"")) # the strip is to remove the quotes from the string
 
+    print("feedbin_result: %s" % feedbin_result)
     return feedbin_result
 
-    
     #return 0
 
 class Feed(object):
