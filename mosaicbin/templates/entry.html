@@ -15,14 +15,17 @@
       <input type='hidden' name='feed_id' value='{{ feed_id }}'>
       {% for e in entries %}
           <a name='{{ loop.index0 }}'></a>
-          <h2>{{ e['title'] }}</h2>
+          <h2>{{ e['title'] }}</h2><input type='submit' value='Mark as Read'>
           <h4>Published <a href="{{ e['url'] }}">{{ e['published_human_readable'] }}</a></h4>
+
           {{ e['content']|safe }}
-          <p><font face='Arial'><input type='checkbox' name='entry_id{{ loop.index0 }}' value='{{ e['id'] }}'> Mark as read</font></p>
+          <!-- <p><font face='Arial'><input type='checkbox' name='entry_id{{ loop.index0 }}' value='{{ e['id'] }}'> Mark as read</font></p> 2020-05-13 -->
           <hr>
+          <!-- added 2020-05-13, instead of a checkbox, select the entry automatically -->
+          <input type='hidden' name='entry_id{{ loop.index0 }}' value='{{ e['id'] }}'>
       {% endfor %}
       <a name='bottom'></a>
-      <input type='submit' value='Mark Checked as Read'>
+      <input type='submit' value='Mark as Read'>
 
 
       

@@ -19,13 +19,13 @@ use_existing_subs_and_tags = True
 if use_existing_subs_and_tags:
     try:
         print("Loading from disk...")
-        fd = open('subs_dict.data', 'rb')
+        fd = open('data_subs_dict.data', 'rb')
         subs_dict = pickle.load(fd)
         fd.close()
-        fd = open('feeds_dict.data', 'rb')
+        fd = open('data_feeds_dict.data', 'rb')
         feeds_dict = pickle.load(fd)
         fd.close()
-        fd = open('tags.data', 'rb')
+        fd = open('data_tags.data', 'rb')
         tags = pickle.load(fd)
         fd.close()
         print("Success!")
@@ -33,21 +33,18 @@ if use_existing_subs_and_tags:
         print("e")
         print("Failed to load from disk.")
 
-        exit()
-
-else:
-    subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
-    
-    fw = open('subs_dict.data', 'wb')
-    pickle.dump(subs_dict, fw)
-    fw.close()
-    fw = open('feeds_dict.data', 'wb')
-    pickle.dump(feeds_dict, fw)
-    fw.close()
-    fw = open('tags.data', 'wb')
-    pickle.dump(tags, fw)
-    fw.close()
-    
+        subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
+        
+        fw = open('data_subs_dict.data', 'wb')
+        pickle.dump(subs_dict, fw)
+        fw.close()
+        fw = open('data_feeds_dict.data', 'wb')
+        pickle.dump(feeds_dict, fw)
+        fw.close()
+        fw = open('data_tags.data', 'wb')
+        pickle.dump(tags, fw)
+        fw.close()
+        
 
 
 @app.route('/test')
