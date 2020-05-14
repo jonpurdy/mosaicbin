@@ -9,6 +9,8 @@ from skimage.transform import resize
 from skimage.util import img_as_ubyte
 from PIL import Image, ImageFile
 import time
+import random # for image name randomization
+import string # for image name randomization
 
 track_thread_status = {}
 
@@ -116,10 +118,9 @@ def clean_entries(entries):
     # this will not update and not work if one thread fails
     timer = 0
     all_done = False
-    # while all_done is False: # delete later, thanks codefactor
+
     while all_done is False:
         for image in track_thread_status:
-            # if track_thread_status[image] == False: # delete later, thanks codefactor
             if track_thread_status[image] is False:
                 all_done = False
             else:
@@ -140,7 +141,9 @@ def convert_image_to_jpg_from_url(url):
     try:
         # prep path for output
         segments = url.rpartition('/')
-        filename = segments[-1].split('?')[0] # removed the stuff after ? with whatever.jpg?w=557
+        # 2020-05-14 generating a hash from the URL to prevent image name collisions (multiple original.jpeg for example)
+        url_hash = str(abs(hash(url)) % (10 ** 6)) # truncated to first 6 digits, unique enough
+        filename = url_hash + segments[-1].split('?')[0] # removed the stuff after ? with whatever.jpg?w=557
         output_filepath = "mosaicbin/static/generated/%s" % filename
         static_path = "/static/generated/"
 
