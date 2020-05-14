@@ -184,7 +184,6 @@ def show_entry(feed_id, entry_id):
         print(e)
         feed_name = "unknown, see show_feed_id"
 
-
     entries = feedbin.get_single_entry(entry_id)
 
     if entries:

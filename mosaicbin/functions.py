@@ -23,8 +23,13 @@ def clean_entries(entries):
             print("key: %s\nvalue: %s" % (k, e[k]))
 
         # make date readable
-        x = dateutil.parser.parse(e['published'])
-        e['published_human_readable'] = x.strftime("%Y-%m-%d %H:%M:%S UTC")
+        try:
+            x = dateutil.parser.parse(e['published'])
+            e['published_human_readable'] = x.strftime("%Y-%m-%d %H:%M:%S UTC")
+        except Exception as e:
+            print(e)
+            print("Date not in correct format. Setting to 1970-01-01 00:00:00.")
+            e['published_human_readable'] = "1970-01-01 00:00:00 UTC"
 
         try:
             # process the html
