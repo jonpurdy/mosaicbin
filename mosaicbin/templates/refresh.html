@@ -8,21 +8,18 @@
     <meta http-equiv="pragma" content="no-cache" />
 
     <!-- <meta http-equiv="refresh" content="1;url=/feed/{{ feed_id }}/{{ current_page }}" /> 2020-05-12 -->
-    <meta http-equiv="refresh" content="0;url=/feed/{{ feed_id }}/titles" />
+    <meta http-equiv="refresh" content="0;url=/" />
 
     <title>Mosaicbin</title>
   </head>
   <body>
-    <h1><a href="/"><img src='/static/icon.gif' width=32 height=32></a>&nbsp;&nbsp;{{ feed_name }}</h1>
+    <h1><a href="/"><img src='/static/icon.gif' width=32 height=32></a>&nbsp;&nbsp;Refreshing...</h1>
     <p>
-    {% for id in entry_ids %}
-      {{ id }}&nbsp;
-    {% endfor %}
-    ...marked as read!</p>
+    Refreshed feeds!
     <p>
       <!-- <a href='/feed/{{ feed_id }}/{{ current_page }}'>Go back!</a> -->
       <!-- <form action="/feed/{{ feed_id }}/{{ current_page }}"> 2020-05-12-->
-      <form action="/feed/{{ feed_id }}/titles">
+      <form action="/">
         <input type="submit" value="Okay!" />
       </form>
     </p>

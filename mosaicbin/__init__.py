@@ -11,46 +11,29 @@ from unidecode import unidecode
 
 app = Flask(__name__)
 
-
-
-use_existing_subs_and_tags = True
-
-# moved up here to make them accessible from any function
-if use_existing_subs_and_tags:
+# Loads the feeds first and ensures the user doesn't have to wait in case it needs to hit the API
+use_cached = True
+if use_cached:
     try:
-        print("Loading from disk...")
-        fd = open('data_subs_dict.data', 'rb')
-        subs_dict = pickle.load(fd)
-        fd.close()
-        fd = open('data_feeds_dict.data', 'rb')
-        feeds_dict = pickle.load(fd)
-        fd.close()
-        fd = open('data_tags.data', 'rb')
-        tags = pickle.load(fd)
-        fd.close()
-        print("Success!")
+        feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
     except Exception as e:
-        print("e")
-        print("Failed to load from disk.")
-
-        subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
-        
-        fw = open('data_subs_dict.data', 'wb')
-        pickle.dump(subs_dict, fw)
-        fw.close()
-        fw = open('data_feeds_dict.data', 'wb')
-        pickle.dump(feeds_dict, fw)
-        fw.close()
-        fw = open('data_tags.data', 'wb')
-        pickle.dump(tags, fw)
-        fw.close()
-        
+        feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
+else:
+    feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
 
 
 @app.route('/test')
 def test():
     name='test'
     return render_template('base.html', name=name)
+
+@app.route('/refresh')
+def refresher():
+
+    # gets them but doesn't need to do anything with the object, since it'll load it whens aved
+    feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
+
+    return render_template('refresh.html')
 
 @app.route('/debug')
 def debug():
@@ -63,7 +46,8 @@ def debug():
 def root():
 
     # moved this up to the top 2020-05-12
-    # subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
+    # feeds_dict, tags = feedbin.get_feeds_and_tags()
+    feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
 
     # We need this to initialize the print_string properly
     print_string = ""
@@ -142,7 +126,7 @@ def root():
 def show_feed_titles(feed_id):
 
     # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+    feeds_dict = feedbin.get_feeds()
 
     feed_obj = feeds_dict[int(feed_id)]
 
@@ -173,7 +157,7 @@ def show_feed_titles(feed_id):
 def show_entry(feed_id, entry_id):
 
     # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+    feeds_dict = feedbin.get_feeds()
 
     feed_obj = feeds_dict[int(feed_id)]
 
@@ -216,13 +200,6 @@ def mark_entries_as_read():
     else:
         # print_string += "No entry IDs."
         result = []
-
-    print("REQUESTFORM2: %s" % request.form)
-
-    # commented way back in 2019
-    # print_string += "...marked as read.</p><p><a href='/feed/%s/%s'>Go back!</a></p>" % (request.form['feed_id'], request.form['current_page'])
-    # print("PS before return: %s" % print_string)
-    
 
     # commented 2020-05-12 to remove current_page
     # return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'], current_page=request.form['current_page'])
