@@ -48,7 +48,7 @@ def root():
 
     # moved this up to the top 2020-05-12
     # feeds_dict, tags = feedbin.get_feeds_and_tags()
-    feedbin.get_cached_feeds_and_tags()
+    feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
 
     # We need this to initialize the print_string properly
     print_string = ""
