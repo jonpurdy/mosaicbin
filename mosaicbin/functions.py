@@ -19,6 +19,9 @@ def clean_entries(entries):
     import dateutil.parser
     from bs4 import BeautifulSoup as BS
 
+
+    image_count = 0 # used later for seeing if threads need to be waited on
+
     print("len(entries): %s" % len(entries))
     for e in entries:
         for k in e:
@@ -115,8 +118,8 @@ def clean_entries(entries):
                 e['content'] = unidecode(e['content'])
                 e['title'] = unidecode(e['title'])
 
-        except Exception as e:
-            print(e)
+        except Exception as ex:
+            print(ex)
             e['content'] = "Error parsing or dealing with content in post."
 
 
