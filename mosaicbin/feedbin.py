@@ -3,6 +3,9 @@ import datetime
 import os
 import mosaicbin.settings as settings
 
+import pickle
+
+
 endpoint = "https://api.feedbin.com/v2/"
 try:
     creds = (str(os.environ['FEEDBIN_USERNAME']), str(os.environ['FEEDBIN_PASSWORD']))
@@ -26,13 +29,31 @@ global feeds_dict
     # 'title': 'Daring Fireball', 'feed_url': 'http://daringfireball.net/index.xml',
     # 'site_url': 'https://daringfireball.net/'}
 
-
     # first, get all unread entries for all feeds
     # make a list of ids in unread_entry_ids
 
+def get_cached_feeds_and_tags():
+    # tries to load from disk
+    # if it fails, load from api, then save to disk
+    try:
+        print("Loading from disk...")
+        fd = open('data_feeds_dict.data', 'rb')
+        feeds_dict = pickle.load(fd)
+        fd.close()
+        fd = open('data_tags.data', 'rb')
+        tags = pickle.load(fd)
+        fd.close()
+        print("Success!")
+    except Exception as e:
+        print("e")
+        print("Failed to load from disk; refreshing...")
+        feeds_dict, tags = get_feeds_and_tags_from_api()   
 
-def get_subs_and_tags():
-    """ Returns subscriptions with tags as a dictionary
+    return feeds_dict, tags
+        
+
+def get_feeds_and_tags_from_api():
+    """ Returns feeds with tags as a dictionary
         Main object used by the index page
     """
     tagging_response = get_tagging()
@@ -83,14 +104,10 @@ def get_subs_and_tags():
     # once we do this, we can print a list of names
     # if the user clicks a name, it links to a page with unread entries for that feed
 
-
-
-    subs_dict, feeds_dict = get_subs_dict()
-
+    feeds_dict = get_feeds()
 
     import time
     from threading import Thread
-
 
     # adding unread counts
     for f in feeds_dict:
@@ -105,13 +122,17 @@ def get_subs_and_tags():
         ### single thread
         #feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
         #feeds_dict[f].unread_count = 0
-
-        # print(feeds_dict[f].feed_id)
-        # print(feeds_dict[f].title)
-        # print(feeds_dict[f].unread_count)
         ### single thread
 
-    return subs_dict, feeds_dict, tags
+    # save these to disk for later
+    fw = open('data_feeds_dict.data', 'wb')
+    pickle.dump(feeds_dict, fw)
+    fw.close()
+    fw = open('data_tags.data', 'wb')
+    pickle.dump(tags, fw)
+    fw.close()
+
+    return feeds_dict, tags
 
 ### remove this to make single threaded
 def update_unread_entry_count(feeds_dict, f):
@@ -139,7 +160,8 @@ def get_tagging():
     return r.json()
 
 
-def get_subs_dict():
+# new hotness, replaces get_subs_dict
+def get_feeds():
 
     path = "subscriptions.json"
     url = "%s%s" % (endpoint, path)
@@ -148,21 +170,15 @@ def get_subs_dict():
 
     r = requests.get(url, auth=creds)
 
-    subs_dict = {}
     feeds_dict = {} # new hotness
 
     for i in r.json():
         if verbose:
             print(i)
-        subs_dict[i['feed_id']] = i['title']
         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
 
+    return feeds_dict
 
-    for x in subs_dict:
-        print("%s %s" % (x, subs_dict[x]))
-
-
-    return subs_dict, feeds_dict
 
 
 def get_all_unread_entries_list():
@@ -323,7 +339,7 @@ def mark_entries_as_read(entry_ids):
     feedbin_result = []
     for i in entry_ids:
         r = requests.post(url, auth=creds, data = {'unread_entries':i})
-        print("deletion r.text (means there was no problem with the response): %s and status code: %s" % (r.text, r.status_code))
+        print("deletion r.text (means there was NO PROBLEM with the response): %s and status code: %s" % (r.text, r.status_code))
         feedbin_result.append(r.text.strip("\"")) # the strip is to remove the quotes from the string
 
     print("feedbin_result: %s" % feedbin_result)

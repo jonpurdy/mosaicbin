@@ -1,8 +1,8 @@
-Flask==1.0.2
-Unidecode==1.0.23
-beautifulsoup4==4.7.1
-bs4==0.0.1
-scikit-image==0.14.2
-Pillow==5.4.1
-requests==2.21.0
-python-dateutil==2.8.0
+Flask
+Unidecode
+beautifulsoup4
+bs4
+scikit-image
+Pillow
+requests
+python-dateutil

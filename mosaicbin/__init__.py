@@ -2,6 +2,8 @@ from mosaicbin import feedbin
 from mosaicbin import settings
 from mosaicbin import functions
 
+import pickle
+
 from flask import Flask
 from flask import request
 from flask import render_template
@@ -9,17 +11,43 @@ from unidecode import unidecode
 
 app = Flask(__name__)
 
+# Loads the feeds first and ensures the user doesn't have to wait in case it needs to hit the API
+use_cached = True
+if use_cached:
+    try:
+        feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
+    except Exception as e:
+        feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
+else:
+    feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
+
+
 @app.route('/test')
 def test():
     name='test'
     return render_template('base.html', name=name)
 
-#global subs_dict # delete later, thanks codefactor
+@app.route('/refresh')
+def refresher():
+
+    # gets them but doesn't need to do anything with the object, since it'll load it whens aved
+    feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
+
+    return render_template('refresh.html')
+
+@app.route('/debug')
+def debug():
+    name='debug'
+    print_string = ""
+    print_string += feeds_dict
+    return render_template('base.html', name=name, print_string=print_string)
 
 @app.route('/')
 def root():
 
-    subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
+    # moved this up to the top 2020-05-12
+    # feeds_dict, tags = feedbin.get_feeds_and_tags()
+    feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
 
     # We need this to initialize the print_string properly
     print_string = ""
@@ -40,10 +68,10 @@ def root():
 
             # only print the feed name if there are unread entries
             if feeds_dict[feed_id].unread_count > 0:
-                print_string += "<a href='feed/%s/1'>%s</a> <a href='feed/%s/titles'>(list)</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feed_id, feeds_dict[feed_id].unread_count)
+                print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
             else:
                 if settings.display_unread_entries:
-                    print_string += "<a href='feed/%s/1'>%s</a> <a href='feed/%s/titles'>(list)</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feed_id, feeds_dict[feed_id].unread_count)
+                    print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
 
         print_string += "</p>"
 
@@ -58,47 +86,47 @@ def root():
     return render_template('base.html', print_string=print_string)
 
 
-@app.route('/feed/<feed_id>/<page_no>')
-def show_feed_id(feed_id, page_no):
+# @app.route('/feed/<feed_id>/<page_no>')
+# def show_feed_id(feed_id, page_no):
 
-    import math 
+#     import math 
 
-    per_page = settings.entries_per_page
+#     per_page = settings.entries_per_page
 
-    # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+#     # this is just to look up the feed name
+#     subs_dict, feeds_dict = feedbin.get_subs_dict()
 
-    try:
-        #feed_name = subs_dict[int(feed_id)]        # old
-        feed_name = feeds_dict[int(feed_id)].title  # new
-    except Exception as e:
-        print(e)
-        feed_name = "unknown, see show_feed_id"
+#     try:
+#         #feed_name = subs_dict[int(feed_id)]        # old
+#         feed_name = feeds_dict[int(feed_id)].title  # new
+#     except Exception as e:
+#         print(e)
+#         feed_name = "unknown, see show_feed_id"
 
-    # now we start the real work
-    unread = feedbin.get_all_unread_entries_list()
+#     # now we start the real work
+#     unread = feedbin.get_all_unread_entries_list()
 
-    entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
+#     entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
 
-    # if len(entries) > 0: # delete later, thanks codefactor
-    if entries:
+#     # if len(entries) > 0: # delete later, thanks codefactor
+#     if entries:
         
-        clean_entries = functions.clean_entries(entries)
-        page_count = math.ceil(total_count / per_page)
+#         clean_entries = functions.clean_entries(entries)
+#         page_count = math.ceil(total_count / per_page)
 
-        return render_template('feed.html', feed_id=feed_id, feed_name=feed_name, entries=clean_entries, per_page=per_page, page_no=page_no, page_count=page_count)
+#         return render_template('feed.html', feed_id=feed_id, feed_name=feed_name, entries=clean_entries, per_page=per_page, page_no=page_no, page_count=page_count)
     
-    else:
+#     else:
 
-        return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
+#         return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
 
 
-
+@app.route('/feed/<feed_id>')
 @app.route('/feed/<feed_id>/titles')
 def show_feed_titles(feed_id):
 
     # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+    feeds_dict = feedbin.get_feeds()
 
     feed_obj = feeds_dict[int(feed_id)]
 
@@ -129,7 +157,7 @@ def show_feed_titles(feed_id):
 def show_entry(feed_id, entry_id):
 
     # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+    feeds_dict = feedbin.get_feeds()
 
     feed_obj = feeds_dict[int(feed_id)]
 
@@ -139,7 +167,6 @@ def show_entry(feed_id, entry_id):
     except Exception as e:
         print(e)
         feed_name = "unknown, see show_feed_id"
-
 
     entries = feedbin.get_single_entry(entry_id)
 
@@ -173,13 +200,6 @@ def mark_entries_as_read():
     else:
         # print_string += "No entry IDs."
         result = []
-
-    print("REQUESTFORM2: %s" % request.form)
-
-    # commented way back in 2019
-    # print_string += "...marked as read.</p><p><a href='/feed/%s/%s'>Go back!</a></p>" % (request.form['feed_id'], request.form['current_page'])
-    # print("PS before return: %s" % print_string)
-    
 
     # commented 2020-05-12 to remove current_page
     # return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'], current_page=request.form['current_page'])
