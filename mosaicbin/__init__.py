@@ -11,30 +11,17 @@ from unidecode import unidecode
 
 app = Flask(__name__)
 
-
-
-use_existing_subs_and_tags = False
+use_cached = True
 
 # moved up here to make them accessible from any function
-if use_existing_subs_and_tags:
+if use_cached:
     try:
-        print("Loading from disk...")
-        fd = open('data_subs_dict.data', 'rb')
-        subs_dict = pickle.load(fd)
-        fd.close()
-        fd = open('data_feeds_dict.data', 'rb')
-        feeds_dict = pickle.load(fd)
-        fd.close()
-        fd = open('data_tags.data', 'rb')
-        tags = pickle.load(fd)
-        fd.close()
-        print("Success!")
+        feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
     except Exception as e:
-        print("e")
-        print("Failed to load from disk; refreshing...")
-        subs_dict, feeds_dict, tags = feedbin.refresh()
+        feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
 else:
-    subs_dict, feeds_dict, tags = feedbin.refresh()
+    feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
+
 
 @app.route('/test')
 def test():
@@ -44,7 +31,8 @@ def test():
 @app.route('/refresh')
 def refresher():
 
-    subs_dict, feeds_dict, tags = feedbin.refresh()
+    # gets them but doesn't need to do anything with the object, since it'll load it whens aved
+    feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
 
     return render_template('refresh.html')
 
@@ -59,7 +47,8 @@ def debug():
 def root():
 
     # moved this up to the top 2020-05-12
-    # subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
+    # feeds_dict, tags = feedbin.get_feeds_and_tags()
+    feedbin.get_cached_feeds_and_tags()
 
     # We need this to initialize the print_string properly
     print_string = ""
@@ -138,7 +127,7 @@ def root():
 def show_feed_titles(feed_id):
 
     # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+    feeds_dict = feedbin.get_feeds()
 
     feed_obj = feeds_dict[int(feed_id)]
 
@@ -169,7 +158,7 @@ def show_feed_titles(feed_id):
 def show_entry(feed_id, entry_id):
 
     # this is just to look up the feed name
-    subs_dict, feeds_dict = feedbin.get_subs_dict()
+    feeds_dict = feedbin.get_feeds()
 
     feed_obj = feeds_dict[int(feed_id)]
 

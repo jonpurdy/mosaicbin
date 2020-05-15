@@ -29,25 +29,31 @@ global feeds_dict
     # 'title': 'Daring Fireball', 'feed_url': 'http://daringfireball.net/index.xml',
     # 'site_url': 'https://daringfireball.net/'}
 
-
     # first, get all unread entries for all feeds
     # make a list of ids in unread_entry_ids
 
-def refresh():
-    subs_dict, feeds_dict, tags = get_subs_and_tags()
-    fw = open('data_subs_dict.data', 'wb')
-    pickle.dump(subs_dict, fw)
-    fw.close()
-    fw = open('data_feeds_dict.data', 'wb')
-    pickle.dump(feeds_dict, fw)
-    fw.close()
-    fw = open('data_tags.data', 'wb')
-    pickle.dump(tags, fw)
-    fw.close()
-    return subs_dict, feeds_dict, tags
+def get_cached_feeds_and_tags():
+    # tries to load from disk
+    # if it fails, load from api, then save to disk
+    try:
+        print("Loading from disk...")
+        fd = open('data_feeds_dict.data', 'rb')
+        feeds_dict = pickle.load(fd)
+        fd.close()
+        fd = open('data_tags.data', 'rb')
+        tags = pickle.load(fd)
+        fd.close()
+        print("Success!")
+    except Exception as e:
+        print("e")
+        print("Failed to load from disk; refreshing...")
+        feeds_dict, tags = get_feeds_and_tags_from_api()   
 
-def get_subs_and_tags():
-    """ Returns subscriptions with tags as a dictionary
+    return feeds_dict, tags
+        
+
+def get_feeds_and_tags_from_api():
+    """ Returns feeds with tags as a dictionary
         Main object used by the index page
     """
     tagging_response = get_tagging()
@@ -100,7 +106,7 @@ def get_subs_and_tags():
 
 
 
-    subs_dict, feeds_dict = get_subs_dict()
+    feeds_dict = get_feeds()
 
 
     import time
@@ -126,7 +132,15 @@ def get_subs_and_tags():
         # print(feeds_dict[f].unread_count)
         ### single thread
 
-    return subs_dict, feeds_dict, tags
+    # save these to disk for later
+    fw = open('data_feeds_dict.data', 'wb')
+    pickle.dump(feeds_dict, fw)
+    fw.close()
+    fw = open('data_tags.data', 'wb')
+    pickle.dump(tags, fw)
+    fw.close()
+
+    return feeds_dict, tags
 
 ### remove this to make single threaded
 def update_unread_entry_count(feeds_dict, f):
@@ -154,7 +168,34 @@ def get_tagging():
     return r.json()
 
 
-def get_subs_dict():
+# def get_subs_dict():
+
+#     path = "subscriptions.json"
+#     url = "%s%s" % (endpoint, path)
+#     if verbose:
+#         print(url)
+
+#     r = requests.get(url, auth=creds)
+
+#     subs_dict = {}
+#     feeds_dict = {} # new hotness
+
+#     for i in r.json():
+#         if verbose:
+#             print(i)
+#         subs_dict[i['feed_id']] = i['title']
+#         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
+
+
+#     for x in subs_dict:
+#         print("%s %s" % (x, subs_dict[x]))
+
+
+#     return subs_dict, feeds_dict
+
+
+# new hotness, replaces get_subs_dict
+def get_feeds():
 
     path = "subscriptions.json"
     url = "%s%s" % (endpoint, path)
@@ -163,21 +204,15 @@ def get_subs_dict():
 
     r = requests.get(url, auth=creds)
 
-    subs_dict = {}
     feeds_dict = {} # new hotness
 
     for i in r.json():
         if verbose:
             print(i)
-        subs_dict[i['feed_id']] = i['title']
         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
 
+    return feeds_dict
 
-    for x in subs_dict:
-        print("%s %s" % (x, subs_dict[x]))
-
-
-    return subs_dict, feeds_dict
 
 
 def get_all_unread_entries_list():
