@@ -10,6 +10,9 @@
   </head>
   <body>
     <img src='/static/icon.gif' width=32 height=32><img src='/static/mosaicbin.gif' height=29>
+    <form action="/refresh">
+      <input type="submit" value="Refresh Feeds" />
+    </form>
     {{ print_string|safe }}
   </body>
 </html>

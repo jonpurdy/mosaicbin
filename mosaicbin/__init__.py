@@ -13,7 +13,7 @@ app = Flask(__name__)
 
 
 
-use_existing_subs_and_tags = True
+use_existing_subs_and_tags = False
 
 # moved up here to make them accessible from any function
 if use_existing_subs_and_tags:
@@ -31,26 +31,22 @@ if use_existing_subs_and_tags:
         print("Success!")
     except Exception as e:
         print("e")
-        print("Failed to load from disk.")
-
-        subs_dict, feeds_dict, tags = feedbin.get_subs_and_tags()
-        
-        fw = open('data_subs_dict.data', 'wb')
-        pickle.dump(subs_dict, fw)
-        fw.close()
-        fw = open('data_feeds_dict.data', 'wb')
-        pickle.dump(feeds_dict, fw)
-        fw.close()
-        fw = open('data_tags.data', 'wb')
-        pickle.dump(tags, fw)
-        fw.close()
-        
-
+        print("Failed to load from disk; refreshing...")
+        subs_dict, feeds_dict, tags = feedbin.refresh()
+else:
+    subs_dict, feeds_dict, tags = feedbin.refresh()
 
 @app.route('/test')
 def test():
     name='test'
     return render_template('base.html', name=name)
+
+@app.route('/refresh')
+def refresher():
+
+    subs_dict, feeds_dict, tags = feedbin.refresh()
+
+    return render_template('refresh.html')
 
 @app.route('/debug')
 def debug():
@@ -216,13 +212,6 @@ def mark_entries_as_read():
     else:
         # print_string += "No entry IDs."
         result = []
-
-    print("REQUESTFORM2: %s" % request.form)
-
-    # commented way back in 2019
-    # print_string += "...marked as read.</p><p><a href='/feed/%s/%s'>Go back!</a></p>" % (request.form['feed_id'], request.form['current_page'])
-    # print("PS before return: %s" % print_string)
-    
 
     # commented 2020-05-12 to remove current_page
     # return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'], current_page=request.form['current_page'])

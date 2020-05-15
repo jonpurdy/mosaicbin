@@ -3,6 +3,9 @@ import datetime
 import os
 import mosaicbin.settings as settings
 
+import pickle
+
+
 endpoint = "https://api.feedbin.com/v2/"
 try:
     creds = (str(os.environ['FEEDBIN_USERNAME']), str(os.environ['FEEDBIN_PASSWORD']))
@@ -30,6 +33,18 @@ global feeds_dict
     # first, get all unread entries for all feeds
     # make a list of ids in unread_entry_ids
 
+def refresh():
+    subs_dict, feeds_dict, tags = get_subs_and_tags()
+    fw = open('data_subs_dict.data', 'wb')
+    pickle.dump(subs_dict, fw)
+    fw.close()
+    fw = open('data_feeds_dict.data', 'wb')
+    pickle.dump(feeds_dict, fw)
+    fw.close()
+    fw = open('data_tags.data', 'wb')
+    pickle.dump(tags, fw)
+    fw.close()
+    return subs_dict, feeds_dict, tags
 
 def get_subs_and_tags():
     """ Returns subscriptions with tags as a dictionary
