@@ -41,6 +41,13 @@ def test_clean_entries_none_content():
     cleaned_entries = mosaicbin.functions.clean_entries(entries)
     assert cleaned_entries[0]['content'] == "Mosaicbin: no content."
 
+def test_clean_entries_image():
+
+    # ensure it processes the image if present
+    entries = [{'id': 24123456789, 'feed_id': 1, 'title': 'blank', 'author': 'blank', 'summary': 'blank', 'content': '<p><img src="https://raw.githubusercontent.com/jonpurdy/mosaicbin/master/mosaicbin/static/icon64.gif"></p>', 'url': 'blank', 'extracted_content_url': 'blank', 'published': '2020-05-14T19:09:08.000000Z', 'created_at': '2020-05-14T19:09:39.881881Z'}]
+    cleaned_entries = mosaicbin.functions.clean_entries(entries)
+    assert cleaned_entries[0]['content'] == "Mosaicbin: no content."
+
 
 # can run the tests by calling this file directly for debugging
 def main():

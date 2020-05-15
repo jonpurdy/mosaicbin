@@ -47,41 +47,47 @@ def clean_entries(entries):
 
                 #track_thread_status = {} # needed to verify that images are all converted before moving on
                 # first, let's convert all images to jpegs and resize them
-                for img in soup.find_all('img'):
 
-                    # now, let's remove the size attribute from images
-                    del(img['srcset'])
-                    #print("after srcset removal: %s" % img)
+                # only go through the image conversion if there is at least one image
+                image_count = len(soup.find_all('img')) # used later to prevent unnecessary waiting on threads
+                if image_count < 1:
+                    pass
+                else:
+                    for img in soup.find_all('img'):
 
-                    #new_url, width = convert_image_to_jpg_from_url(img['src'])
+                        # now, let's remove the size attribute from images
+                        del(img['srcset'])
+                        #print("after srcset removal: %s" % img)
+
+                        #new_url, width = convert_image_to_jpg_from_url(img['src'])
 
 
-                    track_thread_status[img['src']] = False # sets the image status since it's not done yet
+                        track_thread_status[img['src']] = False # sets the image status since it's not done yet
 
-                    #### for testing threading and ensuring page doesn't load before all threads are done
-                    print("*****track_thread_status:*****" % track_thread_status)
-                    for i in track_thread_status:
-                        print(track_thread_status[i])
-                    print("**********")
+                        #### for testing threading and ensuring page doesn't load before all threads are done
+                        print("*****track_thread_status:*****" % track_thread_status)
+                        for i in track_thread_status:
+                            print(track_thread_status[i])
+                        print("**********")
 
-                    new_url = convert_image_to_jpg_from_url(img['src']) # removed width
+                        new_url = convert_image_to_jpg_from_url(img['src']) # removed width
 
-                    # new_tag = soup.new_tag('img', src=new_url, width=width)
-                    new_tag = soup.new_tag('img', src=new_url) # removed width, but put it back if things break
-                    print("after: %s" % new_url)
+                        # new_tag = soup.new_tag('img', src=new_url, width=width)
+                        new_tag = soup.new_tag('img', src=new_url) # removed width, but put it back if things break
+                        print("after: %s" % new_url)
 
-                    # this is confusing to me
-                    # originally had img = new_tag, which looked like it worked but then didn't
-                    # this prints out img incorrectly but works in practice
-                    # look into why this is later
-                    img.replaceWith(new_tag)
-                    print("final img: %s\n----" % img)
+                        # this is confusing to me
+                        # originally had img = new_tag, which looked like it worked but then didn't
+                        # this prints out img incorrectly but works in practice
+                        # look into why this is later
+                        img.replaceWith(new_tag)
+                        print("final img: %s\n----" % img)
 
-                    #### for testing threading and ensuring page doesn't load before all threads are done
-                    print("*****track_thread_status:*****" % track_thread_status)
-                    for i in track_thread_status:
-                        print(track_thread_status[i])
-                    print("**********")
+                        #### for testing threading and ensuring page doesn't load before all threads are done
+                        print("*****track_thread_status:*****" % track_thread_status)
+                        for i in track_thread_status:
+                            print(track_thread_status[i])
+                        print("**********")
 
 
                 if settings.loband is True:
@@ -118,6 +124,8 @@ def clean_entries(entries):
     # this will not update and not work if one thread fails
     timer = 0
     all_done = False
+    if image_count == 0:
+        all_done = True # this is set above if no images are found in the content
 
     while all_done is False:
         for image in track_thread_status:
