@@ -104,14 +104,10 @@ def get_feeds_and_tags_from_api():
     # once we do this, we can print a list of names
     # if the user clicks a name, it links to a page with unread entries for that feed
 
-
-
     feeds_dict = get_feeds()
-
 
     import time
     from threading import Thread
-
 
     # adding unread counts
     for f in feeds_dict:
@@ -126,10 +122,6 @@ def get_feeds_and_tags_from_api():
         ### single thread
         #feeds_dict[f].unread_count = get_unread_entry_count_of_feed(feeds_dict[f].feed_id)
         #feeds_dict[f].unread_count = 0
-
-        # print(feeds_dict[f].feed_id)
-        # print(feeds_dict[f].title)
-        # print(feeds_dict[f].unread_count)
         ### single thread
 
     # save these to disk for later
@@ -166,32 +158,6 @@ def get_tagging():
             print(i)
 
     return r.json()
-
-
-# def get_subs_dict():
-
-#     path = "subscriptions.json"
-#     url = "%s%s" % (endpoint, path)
-#     if verbose:
-#         print(url)
-
-#     r = requests.get(url, auth=creds)
-
-#     subs_dict = {}
-#     feeds_dict = {} # new hotness
-
-#     for i in r.json():
-#         if verbose:
-#             print(i)
-#         subs_dict[i['feed_id']] = i['title']
-#         feeds_dict[i['feed_id']] = Feed(title=i['title'], feed_id=i['feed_id'], unread_count=0)
-
-
-#     for x in subs_dict:
-#         print("%s %s" % (x, subs_dict[x]))
-
-
-#     return subs_dict, feeds_dict
 
 
 # new hotness, replaces get_subs_dict

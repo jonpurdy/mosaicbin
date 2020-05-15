@@ -11,9 +11,8 @@ from unidecode import unidecode
 
 app = Flask(__name__)
 
+# Loads the feeds first and ensures the user doesn't have to wait in case it needs to hit the API
 use_cached = True
-
-# moved up here to make them accessible from any function
 if use_cached:
     try:
         feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
