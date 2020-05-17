@@ -15,10 +15,6 @@ def setup():
         print("Credentials not available. Run:\nexport FEEDBIN_USERNAME='whatever'\nexport FEEDBIN_PASSWORD='whatever'\n")
         exit()
 
-def test_refresh():
-
-    assert True
-
 def test_get_single_entry():
 
     global entries
