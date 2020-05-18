@@ -1,0 +1,45 @@
+<!doctype html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8\">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <title>Mosaicbin</title>
+  </head>
+  <body>
+    <img src='/static/icon.gif' width=32 height=32><img src='/static/mosaicbin.gif' height=29>
+    <form action="/refresh">
+      <input type="submit" value="Refresh Feeds" />
+    </form>
+
+    <h1>Pages</h1>
+    <p>
+
+    <!-- deal with Feedbin Pages first; if title is "Pages" -->
+    {% for feed_id in feeds_dict %}
+      {% if feeds_dict[feed_id].title == "Pages" %}
+        <a href='feed/{{ feed_id }}/titles'>View list of articles saved to Feedbin Pages</a> {{ feeds_dict[feed_id].unread_count }} </br>
+      {% endif %}
+    {% endfor %}
+
+    <!-- for each tag, print all the feeds with that tag -->
+    {% for tag in tags %}
+      <h1>{{ tag }}</h1>
+      <p>
+      <!-- uses tag to look up feed object (with title and unread_count) from feed_dict -->
+      {% for feed_id in tags[tag] %}
+        <!-- only display if unread is greather than 0, or if display_unread is True -->
+        {% if feeds_dict[feed_id].unread_count > 0 %}
+          <a href='feed/{{ feed_id }}/titles'>{{ feeds_dict[feed_id].title }}</a> {{ feeds_dict[feed_id].unread_count }} </br>
+        {% else %}
+          {% if display_unread %}
+            <a href='feed/{{ feed_id }}/titles'>{{ feeds_dict[feed_id].title }}</a> {{ feeds_dict[feed_id].unread_count }} </br>
+          {% endif %}
+        {% endif %}
+        
+      {% endfor %}
+    {% endfor %}
+
+    </p>
+  </body>
+</html>

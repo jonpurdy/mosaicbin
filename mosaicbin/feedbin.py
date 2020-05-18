@@ -162,7 +162,7 @@ def get_tagging():
                 print(i)
     except Exception as e:
         print(e)
-        print("Couldn't get taggings.json. Exiting...")
+        print("Couldn't get taggings.json. I need this to work; exiting...")
         exit()
 
     return r.json()
