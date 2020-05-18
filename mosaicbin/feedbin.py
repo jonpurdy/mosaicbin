@@ -11,6 +11,7 @@ try:
     creds = (str(os.environ['FEEDBIN_USERNAME']), str(os.environ['FEEDBIN_PASSWORD']))
 except Exception as e:
     print("Credentials not available. Run:\nexport FEEDBIN_USERNAME='whatever'\nexport FEEDBIN_PASSWORD='whatever'\n")
+    exit()
 #creds = ('username@domain.net', 'password')
 verbose = True
 
@@ -46,7 +47,7 @@ def get_cached_feeds_and_tags():
         print("Success!")
     except Exception as e:
         print("e")
-        print("Failed to load from disk; refreshing...")
+        print("Failed to load from disk. getting from the API instead...")
         feeds_dict, tags = get_feeds_and_tags_from_api()   
 
     return feeds_dict, tags
@@ -125,12 +126,14 @@ def get_feeds_and_tags_from_api():
         ### single thread
 
     # save these to disk for later
+    print("Got feeds from API. Saving to disk...")
     fw = open('data_feeds_dict.data', 'wb')
     pickle.dump(feeds_dict, fw)
     fw.close()
     fw = open('data_tags.data', 'wb')
     pickle.dump(tags, fw)
     fw.close()
+    print("...done.")
 
     return feeds_dict, tags
 
@@ -149,13 +152,18 @@ def get_tagging():
     if verbose:
         print(url)
 
-    print(creds)
-    r = requests.get(url, auth=creds)
-    if verbose:
-        print(r)
-    for i in r.json():
+    try:
+        print(creds)
+        r = requests.get(url, auth=creds)
         if verbose:
-            print(i)
+            print(r)
+        for i in r.json():
+            if verbose:
+                print(i)
+    except Exception as e:
+        print(e)
+        print("Couldn't get taggings.json. I need this to work; exiting...")
+        exit()
 
     return r.json()
 

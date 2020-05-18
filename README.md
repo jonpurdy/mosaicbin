@@ -49,6 +49,8 @@ Tests are done with PyTest. Just run `pytest`. Coverage is basic and incomplete 
 * ✓ get rights to hamburger logo
 * ✓ create license
 * ✓ config/settings file
+* update local cached feeds' unread count
+* ✓ clean up / template generation
 
 
 ## Links

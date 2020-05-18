@@ -37,88 +37,48 @@ def refresher():
 
 @app.route('/debug')
 def debug():
+
     name='debug'
+
+    feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
+
     print_string = ""
-    print_string += feeds_dict
+
+    print_string += "Printing feeds_dict now...\n"
+
+
+    print_string += "TAGS:"
+
+    for tag in tags:
+        print_string += "tag: %s, tags[tag]: %s" % (tag, tags[tag])
+        print_string += "<p>"
+
+    for feed in feeds_dict:
+        print_string += "feed: %s, feeds_dict[feed]: %s" % (feed, vars(feeds_dict[feed]))
+        # for feed_id in tags[tag]:
+        #     # need to look up the feed name using subs_dict, now feeds_dict
+
+        #     # only print the feed name if there are unread entries
+        #     if feeds_dict[feed_id].unread_count > 0:
+        #         print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+        #     else:
+        #         if settings.display_unread_entries:
+        #             print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
+
+        print_string += "</p>"
+
+
     return render_template('base.html', name=name, print_string=print_string)
+
 
 @app.route('/')
 def root():
 
-    # moved this up to the top 2020-05-12
-    # feeds_dict, tags = feedbin.get_feeds_and_tags()
     feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
 
-    # We need this to initialize the print_string properly
-    print_string = ""
-
-    # Let's get Pages out of the way first
-    print_string += "<h1>Pages</h1>"
-    print_string += "<p>"
-    for feed_id in feeds_dict:
-        if feeds_dict[feed_id].title == "Pages":
-            print_string += "<a href='feed/%s/titles'>View list of articles saved to Feedbin Pages</a> %s </br>" % (feed_id, feeds_dict[feed_id].unread_count)
-    print_string += "</p>"
-
-    for tag in tags:
-        print_string += "<h1>%s</h1>" % tag
-        print_string += "<p>"
-        for feed_id in tags[tag]:
-            # need to look up the feed name using subs_dict, now feeds_dict
-
-            # only print the feed name if there are unread entries
-            if feeds_dict[feed_id].unread_count > 0:
-                print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
-            else:
-                if settings.display_unread_entries:
-                    print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
-
-        print_string += "</p>"
-
-    # added to deal with subs that have no tags
-    # credit K Trueno
-    if len(tags) < 1:
-        print_string += "<h1>All Feeds</h1>"
-        print_string += "<p>"
-        for feed in feeds_dict:
-            print_string += "<a href='feed/%s/1'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
-
-    return render_template('base.html', print_string=print_string)
 
 
-# @app.route('/feed/<feed_id>/<page_no>')
-# def show_feed_id(feed_id, page_no):
-
-#     import math 
-
-#     per_page = settings.entries_per_page
-
-#     # this is just to look up the feed name
-#     subs_dict, feeds_dict = feedbin.get_subs_dict()
-
-#     try:
-#         #feed_name = subs_dict[int(feed_id)]        # old
-#         feed_name = feeds_dict[int(feed_id)].title  # new
-#     except Exception as e:
-#         print(e)
-#         feed_name = "unknown, see show_feed_id"
-
-#     # now we start the real work
-#     unread = feedbin.get_all_unread_entries_list()
-
-#     entries, total_count = feedbin.get_entries(feed_id, unread, per_page, int(page_no))
-
-#     # if len(entries) > 0: # delete later, thanks codefactor
-#     if entries:
-        
-#         clean_entries = functions.clean_entries(entries)
-#         page_count = math.ceil(total_count / per_page)
-
-#         return render_template('feed.html', feed_id=feed_id, feed_name=feed_name, entries=clean_entries, per_page=per_page, page_no=page_no, page_count=page_count)
-    
-#     else:
-
-#         return render_template('feed_no_entries.html', feed_id=feed_id, feed_name=feed_name)
+    return render_template('index.html', feeds_dict=feeds_dict, tags=tags, display_unread=settings.display_unread_entries)
 
 
 @app.route('/feed/<feed_id>')
