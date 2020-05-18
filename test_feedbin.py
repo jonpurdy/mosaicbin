@@ -15,6 +15,23 @@ def setup():
         print("Credentials not available. Run:\nexport FEEDBIN_USERNAME='whatever'\nexport FEEDBIN_PASSWORD='whatever'\n")
         exit()
 
+def test_get_cached_feeds_and_tags():
+
+    feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
+
+    # make sure each feed has the correct format
+    assert type(feeds_dict) == dict
+    for feed in feeds_dict:
+        assert type(feeds_dict[feed].title) == str
+        assert type(feeds_dict[feed].feed_id) == int
+        assert feeds_dict[feed].unread_count >= 0
+
+    # and tags is a dict with the key being a tag, and value being a list of feed IDs
+    assert type(tags) == dict
+    for tag in tags:
+        assert type(tags[tag]) == list
+
+
 def test_get_single_entry():
 
     global entries
@@ -47,6 +64,7 @@ def test_get_single_entry():
 
 # can run the tests by calling this file directly for debugging
 def main():
+    test_get_cached_feeds_and_tags()
     test_get_single_entry()
 
 

@@ -50,7 +50,7 @@ Tests are done with PyTest. Just run `pytest`. Coverage is basic and incomplete 
 * ✓ create license
 * ✓ config/settings file
 * update local cached feeds' unread count
-* clean up / template generation
+* ✓ clean up / template generation
 
 
 ## Links
