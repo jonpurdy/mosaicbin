@@ -22,11 +22,6 @@ else:
     feeds_dict, tags = feedbin.get_feeds_and_tags_from_api()
 
 
-@app.route('/test')
-def test():
-    name='test'
-    return render_template('base.html', name=name)
-
 @app.route('/refresh')
 def refresher():
 
@@ -43,30 +38,15 @@ def debug():
     feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
 
     print_string = ""
-
     print_string += "Printing feeds_dict now...\n"
-
-
     print_string += "TAGS:"
-
     for tag in tags:
         print_string += "tag: %s, tags[tag]: %s" % (tag, tags[tag])
         print_string += "<p>"
 
     for feed in feeds_dict:
         print_string += "feed: %s, feeds_dict[feed]: %s" % (feed, vars(feeds_dict[feed]))
-        # for feed_id in tags[tag]:
-        #     # need to look up the feed name using subs_dict, now feeds_dict
-
-        #     # only print the feed name if there are unread entries
-        #     if feeds_dict[feed_id].unread_count > 0:
-        #         print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
-        #     else:
-        #         if settings.display_unread_entries:
-        #             print_string += "<a href='feed/%s/titles'>%s</a> %s </br>" % (feed_id, feeds_dict[feed_id].title, feeds_dict[feed_id].unread_count)
-
         print_string += "</p>"
-
 
     return render_template('base.html', name=name, print_string=print_string)
 
@@ -75,8 +55,6 @@ def debug():
 def root():
 
     feeds_dict, tags = feedbin.get_cached_feeds_and_tags()
-
-
 
     return render_template('index.html', feeds_dict=feeds_dict, tags=tags, display_unread=settings.display_unread_entries)
 
@@ -118,12 +96,10 @@ def show_entry(feed_id, entry_id):
 
     # this is just to look up the feed name
     feeds_dict = feedbin.get_feeds()
-
     feed_obj = feeds_dict[int(feed_id)]
 
     try:
-        #feed_name = subs_dict[int(feed_id)]        # old
-        feed_name = feed_obj.title  # new
+        feed_name = feed_obj.title
     except Exception as e:
         print(e)
         feed_name = "unknown, see show_feed_id"
@@ -161,6 +137,4 @@ def mark_entries_as_read():
         # print_string += "No entry IDs."
         result = []
 
-    # commented 2020-05-12 to remove current_page
-    # return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'], current_page=request.form['current_page'])
     return render_template('marked_as_read.html', entry_ids=result, feed_id=request.form['feed_id'])
