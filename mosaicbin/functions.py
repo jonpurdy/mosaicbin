@@ -188,6 +188,11 @@ def threaded_convert(url, output_filepath):
     print("url from convert_image_to_jpg_from_url: %s" % url)
     #url = "https://prasadpamidi.github.io/images/image2.jpg"
 
+    # added 2020-05-30 to fix the error I saw on an old version of Debian (required for reasons)
+    # <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1045)>
+    import ssl
+    ssl._create_default_https_context = ssl._create_unverified_context
+
     try:
         img1 = imread(url)
 
