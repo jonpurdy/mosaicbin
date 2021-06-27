@@ -6,3 +6,4 @@ scikit-image
 Pillow
 requests
 python-dateutil
+pytest

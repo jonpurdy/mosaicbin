@@ -51,6 +51,7 @@ Tests are done with PyTest. Just run `pytest`. Coverage is basic and incomplete 
 * ✓ config/settings file
 * update local cached feeds' unread count
 * ✓ clean up / template generation
+* more complete test coverage
 
 
 ## Links
